@@ -123,7 +123,7 @@ export function getSubordinatesRecursive(
         return extractPidId(node.pid) === managerKey;
     });
 
-    let allReports: OrgNode[] = [];
+    const allReports: OrgNode[] = [];
 
     for (const report of directReports) {
         const reportKey = normalizeId(report.id);

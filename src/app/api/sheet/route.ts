@@ -6,7 +6,7 @@ import { getCachedData, invalidateCachePrefix } from "@/lib/cache";
 const EMPLOYEES_CACHE_TTL = 15 * 60 * 1000;
 
 // Columns to select for listing (exclude raw_data for faster queries)
-const LIST_COLUMNS = 'id, emp_id, full_name, job_title, dept, bu, dl_idl_staff, location, employee_type, line_manager, joining_date';
+const LIST_COLUMNS = 'id, emp_id, full_name, job_title, dept, bu, dl_idl_staff, location, employee_type, line_manager, joining_date, line_manager_status, pending_line_manager';
 
 // Whitelist of allowed filter params -> database columns
 const FILTER_MAPPING: { [key: string]: string } = {
@@ -133,7 +133,9 @@ export async function GET(req: Request) {
         "Location": emp.location,
         "Employee Type": emp.employee_type,
         "Line Manager": emp.line_manager,
-        "Joining\r\n Date": emp.joining_date
+        "Joining\r\n Date": emp.joining_date,
+        lineManagerStatus: emp.line_manager_status,
+        pendingLineManager: emp.pending_line_manager
       }));
 
       const total = totalCount || 0;
@@ -183,7 +185,9 @@ export async function GET(req: Request) {
           "Location": emp.location,
           "Employee Type": emp.employee_type,
           "Line Manager": emp.line_manager,
-          "Joining\r\n Date": emp.joining_date
+          "Joining\r\n Date": emp.joining_date,
+          lineManagerStatus: emp.line_manager_status,
+          pendingLineManager: emp.pending_line_manager
         }));
 
         console.log(`✅ Loaded ${transformedEmployees.length} employees`);

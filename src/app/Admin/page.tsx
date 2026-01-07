@@ -3,7 +3,7 @@
 import { useState } from "react";
 import UserManagement from "./components/UserManagement";
 import DataImport from "./components/DataImport";
-import SheetManager from "../SheetManager/page";
+import SheetManagerTable from "@/components/SheetManagerTable";
 
 // Icons
 import {
@@ -93,7 +93,7 @@ export default function AdminDashboard() {
 
                     {activeTab === 'approvals' && (
                         <div className="h-full overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <SheetManager initialShowApprovalOnly={true} enableApproval={true} />
+                            <SheetManagerTable initialShowApprovalOnly={true} enableApproval={true} />
                         </div>
                     )}
                 </div>
