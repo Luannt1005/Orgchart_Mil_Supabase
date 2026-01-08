@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getCachedData, invalidateCachePrefix } from "@/lib/cache";
+import { syncSingleEmployee } from "../sync-orgchart/route";
 
 // Cache TTL: 15 minutes for employee list
 const EMPLOYEES_CACHE_TTL = 15 * 60 * 1000;
 
-// Columns to select for listing (exclude raw_data for faster queries)
-const LIST_COLUMNS = 'id, emp_id, full_name, job_title, dept, bu, dl_idl_staff, location, employee_type, line_manager, joining_date, line_manager_status, pending_line_manager';
+// Columns to select for listing - all employee data columns
+const LIST_COLUMNS = 'id, emp_id, full_name, job_title, dept, bu, bu_org_3, dl_idl_staff, location, employee_type, line_manager, joining_date, last_working_day, line_manager_status, pending_line_manager';
 
 // Whitelist of allowed filter params -> database columns
 const FILTER_MAPPING: { [key: string]: string } = {
@@ -19,6 +20,9 @@ const FILTER_MAPPING: { [key: string]: string } = {
   'Emp ID': 'emp_id',
   'Employee Type': 'employee_type',
   'Line Manager': 'line_manager',
+  // Approval workflow filters
+  'lineManagerStatus': 'line_manager_status',
+  'line_manager_status': 'line_manager_status',
   // Common lowercase variations
   'dept': 'dept',
   'bu': 'bu',
@@ -87,7 +91,12 @@ export async function GET(req: Request) {
       Object.entries(filters).forEach(([key, value]) => {
         const dbColumn = FILTER_MAPPING[key];
         if (dbColumn) {
-          countQuery = countQuery.ilike(dbColumn, `%${value}%`);
+          // Use exact match for status columns, ilike for text search
+          if (dbColumn === 'line_manager_status') {
+            countQuery = countQuery.eq(dbColumn, value);
+          } else {
+            countQuery = countQuery.ilike(dbColumn, `%${value}%`);
+          }
         }
       });
 
@@ -108,7 +117,12 @@ export async function GET(req: Request) {
       Object.entries(filters).forEach(([key, value]) => {
         const dbColumn = FILTER_MAPPING[key];
         if (dbColumn) {
-          dataQuery = dataQuery.ilike(dbColumn, `%${value}%`);
+          // Use exact match for status columns, ilike for text search
+          if (dbColumn === 'line_manager_status') {
+            dataQuery = dataQuery.eq(dbColumn, value);
+          } else {
+            dataQuery = dataQuery.ilike(dbColumn, `%${value}%`);
+          }
         }
       });
 
@@ -121,7 +135,7 @@ export async function GET(req: Request) {
         throw dataError;
       }
 
-      // Transform to match expected format
+      // Transform to match expected format - all data comes from database columns directly
       const transformedEmployees = (employees || []).map(emp => ({
         id: emp.id,
         "Emp ID": emp.emp_id,
@@ -129,11 +143,13 @@ export async function GET(req: Request) {
         "Job Title": emp.job_title,
         "Dept": emp.dept,
         "BU": emp.bu,
+        "BU Org 3": emp.bu_org_3,
         "DL/IDL/Staff": emp.dl_idl_staff,
         "Location": emp.location,
         "Employee Type": emp.employee_type,
         "Line Manager": emp.line_manager,
         "Joining\r\n Date": emp.joining_date,
+        "Last Working\r\nDay": emp.last_working_day,
         lineManagerStatus: emp.line_manager_status,
         pendingLineManager: emp.pending_line_manager
       }));
@@ -174,6 +190,7 @@ export async function GET(req: Request) {
 
         if (error) throw error;
 
+        // Transform to match expected format - all data comes from database columns directly
         const transformedEmployees = (employees || []).map(emp => ({
           id: emp.id,
           "Emp ID": emp.emp_id,
@@ -181,11 +198,13 @@ export async function GET(req: Request) {
           "Job Title": emp.job_title,
           "Dept": emp.dept,
           "BU": emp.bu,
+          "BU Org 3": emp.bu_org_3,
           "DL/IDL/Staff": emp.dl_idl_staff,
           "Location": emp.location,
           "Employee Type": emp.employee_type,
           "Line Manager": emp.line_manager,
           "Joining\r\n Date": emp.joining_date,
+          "Last Working\r\nDay": emp.last_working_day,
           lineManagerStatus: emp.line_manager_status,
           pendingLineManager: emp.pending_line_manager
         }));
@@ -241,12 +260,13 @@ export async function POST(req: Request) {
         job_title: data["Job Title"] || null,
         dept: data["Dept"] || null,
         bu: data["BU"] || null,
+        bu_org_3: data["BU Org 3"] || null,
         dl_idl_staff: data["DL/IDL/Staff"] || null,
         location: data["Location"] || null,
         employee_type: data["Employee Type"] || null,
         line_manager: data["Line Manager"] || null,
-        joining_date: data["Joining\r\n Date"] || null,
-        raw_data: data
+        joining_date: data["Joining\r\n Date"] || data["Joining Date"] || null,
+        last_working_day: data["Last Working\r\nDay"] || data["Last Working Day"] || null
       };
 
       const { data: inserted, error } = await supabaseAdmin
@@ -258,6 +278,13 @@ export async function POST(req: Request) {
       if (error) throw error;
 
       invalidateCachePrefix('employees');
+
+      // Sync to OrgChart asynchronously
+      if (inserted && inserted.id) {
+        syncSingleEmployee(inserted.id).then((res: any) => {
+          console.log(`Async sync result for ${inserted.id}:`, res);
+        }).catch((err: any) => console.error("Async sync failed:", err));
+      }
 
       return NextResponse.json({
         success: true,
@@ -384,12 +411,28 @@ export async function PUT(req: Request) {
     if (data["Job Title"]) updateData.job_title = data["Job Title"];
     if (data["Dept"]) updateData.dept = data["Dept"];
     if (data["BU"]) updateData.bu = data["BU"];
+    if (data["BU Org 3"]) updateData.bu_org_3 = data["BU Org 3"];
     if (data["DL/IDL/Staff"]) updateData.dl_idl_staff = data["DL/IDL/Staff"];
     if (data["Location"]) updateData.location = data["Location"];
     if (data["Employee Type"]) updateData.employee_type = data["Employee Type"];
     if (data["Line Manager"]) updateData.line_manager = data["Line Manager"];
-    if (data["Joining\r\n Date"]) updateData.joining_date = data["Joining\r\n Date"];
-    updateData.raw_data = data;
+    if (data["Joining\r\n Date"] || data["Joining Date"]) updateData.joining_date = data["Joining\r\n Date"] || data["Joining Date"];
+    if (data["Last Working\r\nDay"] || data["Last Working Day"]) updateData.last_working_day = data["Last Working\r\nDay"] || data["Last Working Day"];
+
+    // Handle approval workflow fields
+    if (data["lineManagerStatus"] !== undefined) {
+      updateData.line_manager_status = data["lineManagerStatus"];
+    }
+    if (data["pendingLineManager"] !== undefined) {
+      updateData.pending_line_manager = data["pendingLineManager"];
+    }
+    // Also handle snake_case versions (from direct API calls)
+    if (data["line_manager_status"] !== undefined) {
+      updateData.line_manager_status = data["line_manager_status"];
+    }
+    if (data["pending_line_manager"] !== undefined) {
+      updateData.pending_line_manager = data["pending_line_manager"];
+    }
 
     const { error } = await supabaseAdmin
       .from('employees')
@@ -399,6 +442,11 @@ export async function PUT(req: Request) {
     if (error) throw error;
 
     invalidateCachePrefix('employees');
+
+    // Sync to OrgChart asynchronously
+    syncSingleEmployee(id).then((res: any) => {
+      console.log(`Async sync result for ${id}:`, res);
+    }).catch((err: any) => console.error("Async sync failed:", err));
 
     return NextResponse.json({
       success: true,

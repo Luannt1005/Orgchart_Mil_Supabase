@@ -113,18 +113,20 @@ export async function POST(req: Request) {
         return;
       }
 
+      // Insert all employee data into proper database columns
       employeesToInsert.push({
         emp_id: empId,
         full_name: row["FullName "] || row["FullName"] || null,
         job_title: row["Job Title"] || null,
         dept: row["Dept"] || null,
         bu: row["BU"] || null,
+        bu_org_3: row["BU Org 3"] || row["BU Org 3 "] || null,
         dl_idl_staff: row["DL/IDL/Staff"] || null,
         location: row["Location"] || null,
         employee_type: row["Employee Type"] || null,
         line_manager: row["Line Manager"] || null,
         joining_date: row["Joining\r\n Date"] || row["Joining Date"] || null,
-        raw_data: row
+        last_working_day: row["Last Working\r\nDay"] || row["Last Working Day"] || row["Last Working\r\n Day"] || null
       });
     });
 

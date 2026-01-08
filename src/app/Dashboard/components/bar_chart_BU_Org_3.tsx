@@ -19,7 +19,8 @@ const BUOrg3Chart: React.FC<BUOrg3ChartProps> = ({ className, nodes, loading = f
         const groupedData: Record<string, number> = {};
 
         nodes.forEach((node: any) => {
-            const buOrg3 = node['BU Org 3'] || node['BU Org 3 '] || 'Unknown';
+            // Use 'BU Org 3' from Supabase API, fallback to 'Dept' if not available
+            const buOrg3 = node['BU Org 3'] || node['BU Org 3 '] || node['Dept'] || node['dept'] || 'Unknown';
             if (!groupedData[buOrg3]) groupedData[buOrg3] = 0;
             groupedData[buOrg3]++;
         });

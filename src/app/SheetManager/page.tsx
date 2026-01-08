@@ -4,6 +4,10 @@ import SheetManagerTable from '@/components/SheetManagerTable';
 
 export default function SheetManagerPage() {
   return (
-    <SheetManagerTable />
+    <SheetManagerTable
+      enableApproval={false}
+      enableSync={false}
+      enableDeleteAll={false}
+    />
   );
 }

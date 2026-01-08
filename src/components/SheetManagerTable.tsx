@@ -112,9 +112,16 @@ const formatDateToISO = (value: string): string => {
 interface SheetManagerProps {
   initialShowApprovalOnly?: boolean;
   enableApproval?: boolean;
+  enableSync?: boolean;
+  enableDeleteAll?: boolean;
 }
 
-const SheetManager = ({ initialShowApprovalOnly = false, enableApproval = true }: SheetManagerProps) => {
+const SheetManager = ({
+  initialShowApprovalOnly = false,
+  enableApproval = true,
+  enableSync = true,
+  enableDeleteAll = true
+}: SheetManagerProps) => {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -561,7 +568,7 @@ const SheetManager = ({ initialShowApprovalOnly = false, enableApproval = true }
             Save ({modifiedRows.size})
           </button>
 
-          {enableApproval && (
+          {enableSync && (
             <button
               onClick={async () => {
                 try {
@@ -616,16 +623,18 @@ const SheetManager = ({ initialShowApprovalOnly = false, enableApproval = true }
           )}
 
           {/* Delete All Data - dangerous action */}
-          <button
-            onClick={handleDeleteAll}
-            disabled={saving || totalRecords === 0}
-            className={`${styles.btnReset} flex items-center gap-2`}
-            style={{ backgroundColor: '#dc2626' }}
-            title="Delete ALL employee data (DANGEROUS)"
-          >
-            <TrashIcon className="w-4 h-4" />
-            Delete All
-          </button>
+          {enableDeleteAll && (
+            <button
+              onClick={handleDeleteAll}
+              disabled={saving || totalRecords === 0}
+              className={`${styles.btnReset} flex items-center gap-2`}
+              style={{ backgroundColor: '#dc2626' }}
+              title="Delete ALL employee data (DANGEROUS)"
+            >
+              <TrashIcon className="w-4 h-4" />
+              Delete All
+            </button>
+          )}
         </div>
       </div>
 

@@ -40,16 +40,26 @@ const UpcomingResignTable: React.FC<UpcomingResignTableProps> = ({ className, no
 
         return nodes
             .filter((node: any) => {
-                const lastWorkingDay = node['Last Working\r\nDay'] || node['Last Working Day'] || node['last working day'];
+                const lastWorkingDay = node['Last Working\r\nDay'] ||
+                    node['Last Working Day'] ||
+                    node['last_working_day'] ||
+                    node['last working day'];
                 return lastWorkingDay && String(lastWorkingDay).trim() !== '';
             })
-            .map((node: any) => ({
-                empId: node['Employee ID'] || node['Emp ID'] || '',
-                fullName: node['Full Name'] || node['Name'] || node['FullName '] || node['FullName'] || '',
-                dept: node['BU Org 3'] || node['Department'] || node['Dept'] || '',
-                lastWorkingDay: node['Last Working\r\nDay'] || node['Last Working Day'] || '',
-                imageUrl: `https://raw.githubusercontent.com/Luannt1005/test-images/main/${node['Emp ID'] || node['Employee ID'] || ''}.jpg`
-            }))
+            .map((node: any) => {
+                const lastWorkingDay = node['Last Working\r\nDay'] ||
+                    node['Last Working Day'] ||
+                    node['last_working_day'] ||
+                    node['last working day'] || '';
+
+                return {
+                    empId: node['Employee ID'] || node['Emp ID'] || node['emp_id'] || '',
+                    fullName: node['Full Name'] || node['Name'] || node['FullName '] || node['FullName'] || node['full_name'] || '',
+                    dept: node['BU Org 3'] || node['Department'] || node['Dept'] || node['bu_org_3'] || '',
+                    lastWorkingDay: lastWorkingDay,
+                    imageUrl: `https://raw.githubusercontent.com/Luannt1005/test-images/main/${node['Emp ID'] || node['Employee ID'] || node['emp_id'] || ''}.jpg`
+                };
+            })
             .sort((a, b) => String(a.lastWorkingDay).localeCompare(String(b.lastWorkingDay)))
             .slice(0, 5); // Show only top 5
     }, [nodes]);

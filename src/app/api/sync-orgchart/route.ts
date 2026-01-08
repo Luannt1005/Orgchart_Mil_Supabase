@@ -11,12 +11,15 @@ interface Employee {
   job_title: string | null;
   dept: string | null;
   bu: string | null;
+  bu_org_3: string | null;
   dl_idl_staff: string | null;
   location: string | null;
   employee_type: string | null;
   line_manager: string | null;
   joining_date: string | null;
-  raw_data: Record<string, any> | null;
+  last_working_day: string | null;
+  line_manager_status: string | null;
+  pending_line_manager: string | null;
   [key: string]: any;
 }
 
@@ -83,7 +86,7 @@ const isProbationPeriod = (joiningDateStr: string): boolean => {
 /**
  * Sync single employee to orgchart
  */
-async function syncSingleEmployee(employeeId: string) {
+export async function syncSingleEmployee(employeeId: string) {
   try {
     // Fetch employee from Supabase
     const { data: emp, error } = await supabaseAdmin
@@ -112,8 +115,8 @@ async function syncSingleEmployee(employeeId: string) {
       return { success: false, message: "Missing Emp ID" };
     }
 
-    // Get manager ID from line_manager
-    const managerRaw = emp.line_manager || (emp.raw_data && emp.raw_data["Line Manager"]);
+    // Get manager ID from line_manager column
+    const managerRaw = emp.line_manager;
     const managerId = managerRaw
       ? trimLeadingZeros(String(managerRaw).split(":")[0].trim())
       : null;
@@ -121,7 +124,7 @@ async function syncSingleEmployee(employeeId: string) {
     const dept = emp.dept || "";
     const deptKey = `dept:${dept}:${managerId}`;
 
-    const joiningDate = formatDate(emp.joining_date || (emp.raw_data && emp.raw_data["Joining\r\n Date"])) || "";
+    const joiningDate = formatDate(emp.joining_date) || "";
     const tags = ["emp"];
 
     if (joiningDate && isProbationPeriod(joiningDate)) {
@@ -205,7 +208,8 @@ async function syncEmployeesToOrgchart() {
       const empId = String(emp.emp_id || "").trim();
       if (!empId) return;
 
-      const managerRaw = emp.line_manager || (emp.raw_data && emp.raw_data["Line Manager"]);
+      // Get manager ID from line_manager column
+      const managerRaw = emp.line_manager;
       const managerId = managerRaw
         ? trimLeadingZeros(String(managerRaw).split(":")[0].trim())
         : null;
@@ -215,7 +219,7 @@ async function syncEmployeesToOrgchart() {
 
       deptMap.set(deptKey, { dept, managerId });
 
-      const joiningDate = formatDate(emp.joining_date || (emp.raw_data && emp.raw_data["Joining\r\n Date"])) || "";
+      const joiningDate = formatDate(emp.joining_date) || "";
       const tags = ["emp"];
 
       if (joiningDate && isProbationPeriod(joiningDate)) {
