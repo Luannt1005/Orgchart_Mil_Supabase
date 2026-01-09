@@ -14,6 +14,7 @@ interface Employee {
     dl_idl_staff: string | null;
     location: string | null;
     employee_type: string | null;
+    is_direct: string | null;
     line_manager: string | null;
     joining_date: string | null;
     last_working_day: string | null;
@@ -116,12 +117,26 @@ export async function syncSingleEmployee(employeeId: string) {
 
         // Get manager ID from line_manager column
         const managerRaw = emp.line_manager;
-        const managerId = managerRaw
-            ? trimLeadingZeros(String(managerRaw).split(":")[0].trim())
-            : null;
+        let managerPart = managerRaw ? String(managerRaw).split(":")[0].trim() : null;
+
+        let isIndirectManager = false;
+        let managerId = null; // This is the real ID (PID)
+        let deptManagerId = null; // This is used for generating the dept node ID
+
+        if (managerPart) {
+            // Check is_direct column instead of prefix
+            if (emp.is_direct && String(emp.is_direct).toUpperCase() === 'NO') {
+                isIndirectManager = true;
+                managerId = trimLeadingZeros(managerPart);
+                deptManagerId = "i-" + managerId;
+            } else {
+                managerId = trimLeadingZeros(managerPart);
+                deptManagerId = managerId;
+            }
+        }
 
         const dept = emp.dept || "";
-        const deptKey = `dept:${dept}:${managerId}`;
+        const deptKey = `dept:${dept}:${deptManagerId}`;
 
         const joiningDate = formatDate(emp.joining_date) || "";
         const tags = ["emp"];
@@ -148,6 +163,8 @@ export async function syncSingleEmployee(employeeId: string) {
             joining_date: joiningDate
         };
 
+        const deptTags = isIndirectManager ? ["indirect_group"] : ["group"];
+
         // Prepare department node
         const deptNode = {
             id: deptKey,
@@ -156,7 +173,7 @@ export async function syncSingleEmployee(employeeId: string) {
             name: dept,
             title: "Department",
             image: null,
-            tags: JSON.stringify(["group"]),
+            tags: JSON.stringify(deptTags),
             orig_pid: managerId,
             dept: dept,
             bu: null,
@@ -209,14 +226,28 @@ export async function syncEmployeesToOrgchart() {
 
             // Get manager ID from line_manager column
             const managerRaw = emp.line_manager;
-            const managerId = managerRaw
-                ? trimLeadingZeros(String(managerRaw).split(":")[0].trim())
-                : null;
+            let managerPart = managerRaw ? String(managerRaw).split(":")[0].trim() : null;
+
+            let isIndirectManager = false;
+            let managerId = null;
+            let deptManagerId = null;
+
+            if (managerPart) {
+                // Check is_direct column instead of prefix
+                if (emp.is_direct && String(emp.is_direct).toUpperCase() === 'NO') {
+                    isIndirectManager = true;
+                    managerId = trimLeadingZeros(managerPart);
+                    deptManagerId = "i-" + managerId;
+                } else {
+                    managerId = trimLeadingZeros(managerPart);
+                    deptManagerId = managerId;
+                }
+            }
 
             const dept = emp.dept || "";
-            const deptKey = `dept:${dept}:${managerId}`;
+            const deptKey = `dept:${dept}:${deptManagerId}`;
 
-            deptMap.set(deptKey, { dept, managerId });
+            deptMap.set(deptKey, { dept, managerId, isIndirectManager });
 
             const joiningDate = formatDate(emp.joining_date) || "";
             const tags = ["emp"];
@@ -245,6 +276,7 @@ export async function syncEmployeesToOrgchart() {
 
         // Add department nodes
         deptMap.forEach((v, deptKey) => {
+            const deptTags = v.isIndirectManager ? ["indirect_group"] : ["group"];
             output.push({
                 id: deptKey,
                 pid: v.managerId,
@@ -252,7 +284,7 @@ export async function syncEmployeesToOrgchart() {
                 name: v.dept || "",
                 title: "Department",
                 image: null,
-                tags: JSON.stringify(["group"]),
+                tags: JSON.stringify(deptTags),
                 orig_pid: v.managerId,
                 dept: v.dept || "",
                 bu: null,

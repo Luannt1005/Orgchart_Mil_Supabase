@@ -39,6 +39,7 @@ const VISIBLE_COLUMNS = [
   "Emp ID",
   "Dept",
   "Line Manager",
+  "Is Direct",
   "Cost Center",
   "Joining\r\n Date",
   "FullName ",
@@ -58,6 +59,7 @@ const ADD_FORM_COLUMNS = [
   "BU Org 3",
   "Cost Center",
   "Line Manager",
+  "Is Direct",
   "Joining\r\n Date",
   "Status",
   "Location",
@@ -73,7 +75,8 @@ const FILTER_COLUMNS = [
   "Dept",
   "BU Org 3",
   "FullName ",
-  "DL/IDL/Staff"
+  "DL/IDL/Staff",
+  "Is Direct"
 ];
 
 // Helper functions

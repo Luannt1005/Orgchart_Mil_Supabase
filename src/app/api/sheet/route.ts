@@ -7,7 +7,7 @@ import { syncSingleEmployee } from "@/lib/orgchart-sync";
 const EMPLOYEES_CACHE_TTL = 15 * 60 * 1000;
 
 // Columns to select for listing - all employee data columns
-const LIST_COLUMNS = 'id, emp_id, full_name, job_title, dept, bu, bu_org_3, dl_idl_staff, location, employee_type, line_manager, joining_date, last_working_day, line_manager_status, pending_line_manager';
+const LIST_COLUMNS = 'id, emp_id, full_name, job_title, dept, bu, bu_org_3, dl_idl_staff, location, employee_type, line_manager, joining_date, last_working_day, line_manager_status, pending_line_manager, is_direct';
 
 // Whitelist of allowed filter params -> database columns
 const FILTER_MAPPING: { [key: string]: string } = {
@@ -20,6 +20,7 @@ const FILTER_MAPPING: { [key: string]: string } = {
   'Emp ID': 'emp_id',
   'Employee Type': 'employee_type',
   'Line Manager': 'line_manager',
+  'Is Direct': 'is_direct',
   // Approval workflow filters
   'lineManagerStatus': 'line_manager_status',
   'line_manager_status': 'line_manager_status',
@@ -32,7 +33,8 @@ const FILTER_MAPPING: { [key: string]: string } = {
   'job_title': 'job_title',
   'dl_idl_staff': 'dl_idl_staff',
   'employee_type': 'employee_type',
-  'line_manager': 'line_manager'
+  'line_manager': 'line_manager',
+  'is_direct': 'is_direct'
 };
 
 /**
@@ -148,6 +150,7 @@ export async function GET(req: Request) {
         "Location": emp.location,
         "Employee Type": emp.employee_type,
         "Line Manager": emp.line_manager,
+        "Is Direct": emp.is_direct,
         "Joining\r\n Date": emp.joining_date,
         "Last Working\r\nDay": emp.last_working_day,
         lineManagerStatus: emp.line_manager_status,
@@ -161,7 +164,7 @@ export async function GET(req: Request) {
 
       const response = NextResponse.json({
         success: true,
-        headers: ["id", "Emp ID", "FullName ", "Job Title", "Dept", "BU", "DL/IDL/Staff", "Location", "Employee Type", "Line Manager", "Joining\r\n Date"],
+        headers: ["id", "Emp ID", "FullName ", "Job Title", "Dept", "BU", "DL/IDL/Staff", "Location", "Employee Type", "Line Manager", "Is Direct", "Joining\r\n Date"],
         data: transformedEmployees,
         page,
         limit,
@@ -203,6 +206,7 @@ export async function GET(req: Request) {
           "Location": emp.location,
           "Employee Type": emp.employee_type,
           "Line Manager": emp.line_manager,
+          "Is Direct": emp.is_direct,
           "Joining\r\n Date": emp.joining_date,
           "Last Working\r\nDay": emp.last_working_day,
           lineManagerStatus: emp.line_manager_status,
@@ -212,7 +216,7 @@ export async function GET(req: Request) {
         console.log(`✅ Loaded ${transformedEmployees.length} employees`);
         return {
           employees: transformedEmployees,
-          headers: ["id", "Emp ID", "FullName ", "Job Title", "Dept", "BU", "DL/IDL/Staff", "Location", "Employee Type", "Line Manager", "Joining\r\n Date"]
+          headers: ["id", "Emp ID", "FullName ", "Job Title", "Dept", "BU", "DL/IDL/Staff", "Location", "Employee Type", "Line Manager", "Is Direct", "Joining\r\n Date"]
         };
       },
       EMPLOYEES_CACHE_TTL
@@ -265,6 +269,7 @@ export async function POST(req: Request) {
         location: data["Location"] || null,
         employee_type: data["Employee Type"] || null,
         line_manager: data["Line Manager"] || null,
+        is_direct: data["Is Direct"] || "YES",
         joining_date: data["Joining\r\n Date"] || data["Joining Date"] || null,
         last_working_day: data["Last Working\r\nDay"] || data["Last Working Day"] || null
       };
@@ -418,6 +423,7 @@ export async function PUT(req: Request) {
     if (data["Line Manager"]) updateData.line_manager = data["Line Manager"];
     if (data["Joining\r\n Date"] || data["Joining Date"]) updateData.joining_date = data["Joining\r\n Date"] || data["Joining Date"];
     if (data["Last Working\r\nDay"] || data["Last Working Day"]) updateData.last_working_day = data["Last Working\r\nDay"] || data["Last Working Day"];
+    if (data["Is Direct"]) updateData.is_direct = data["Is Direct"];
 
     // Handle approval workflow fields
     if (data["lineManagerStatus"] !== undefined) {

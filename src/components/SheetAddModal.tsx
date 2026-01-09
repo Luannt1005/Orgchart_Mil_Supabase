@@ -55,6 +55,8 @@ export default function SheetAddModal({ isOpen, onClose, onSave, columns }: Shee
     const getInputType = (col: string) => {
         const lower = col.toLowerCase();
         if (lower.includes('date') || lower.includes('day')) return 'date';
+        // Identify fields that should be selects
+        if (['dl/idl/staff', 'employee type', 'status', 'is direct'].includes(lower)) return 'select';
         return 'text';
     };
 
@@ -102,14 +104,43 @@ export default function SheetAddModal({ isOpen, onClose, onSave, columns }: Shee
                                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">
                                         {label} {col === 'Emp ID' && <span className="text-red-500">*</span>}
                                     </label>
-                                    <input
-                                        type={inputType}
-                                        value={formData[col] || ''}
-                                        onChange={(e) => handleChange(col, e.target.value)}
-                                        className="w-full h-10 px-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-sm text-gray-800 placeholder:text-gray-400"
-                                        placeholder={`Enter ${label}`}
-                                        required={col === 'Emp ID'}
-                                    />
+                                    {inputType === 'select' ? (
+                                        <select
+                                            value={formData[col] || ''}
+                                            onChange={(e) => handleChange(col, e.target.value)}
+                                            className="w-full h-10 px-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-sm text-gray-800"
+                                        >
+                                            <option value="">Select {label}</option>
+                                            {col === 'DL/IDL/Staff' && (
+                                                <>
+                                                    <option value="DL">DL</option>
+                                                    <option value="IDL">IDL</option>
+                                                    <option value="Staff">Staff</option>
+                                                </>
+                                            )}
+                                            {col === 'Status' && (
+                                                <>
+                                                    <option value="Active">Active</option>
+                                                    <option value="Resigned">Resigned</option>
+                                                </>
+                                            )}
+                                            {col === 'Is Direct' && (
+                                                <>
+                                                    <option value="YES">YES</option>
+                                                    <option value="NO">NO</option>
+                                                </>
+                                            )}
+                                        </select>
+                                    ) : (
+                                        <input
+                                            type={inputType}
+                                            value={formData[col] || ''}
+                                            onChange={(e) => handleChange(col, e.target.value)}
+                                            className="w-full h-10 px-3 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all text-sm text-gray-800 placeholder:text-gray-400"
+                                            placeholder={`Enter ${label}`}
+                                            required={col === 'Emp ID'}
+                                        />
+                                    )}
                                 </div>
                             );
                         })}

@@ -32,11 +32,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} bg-gray-50`}
         suppressHydrationWarning
       >
-        <div className="flex w-full min-h-screen">
+        <div className="flex w-full h-screen overflow-hidden">
           <Sidebar />
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 flex flex-col min-w-0 h-full">
             <Header />
-            <main className="flex-1 overflow-auto bg-gray-200 relative p-4">
+            <main className="flex-1 overflow-auto bg-gray-200 relative p-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent">
               <PageTransition>
                 {children}
               </PageTransition>

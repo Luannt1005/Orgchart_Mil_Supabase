@@ -22,7 +22,7 @@ export function patchOrgChartTemplates() {
         </feMerge>
     </filter>`;
 
-  OrgChart.templates.big.size = [230, 330];
+  // OrgChart.templates.big.size = [230, 330];
 
   // Main Node Body: Solid White, Red Top Accent
   OrgChart.templates.big.size = [230, 380]; // 330 + 50
@@ -120,6 +120,11 @@ export function patchOrgChartTemplates() {
   // Hide "up" button
   // ------------------------------
   OrgChart.templates.big.up = "";
+
+
+
+
+
   // --- GROUP TEMPLATE (Sector Header) ---
   // Initialize if not exists, or clone from ana
   if (!OrgChart.templates.group) {
@@ -172,8 +177,13 @@ export function patchOrgChartTemplates() {
   // --- TEMPLATE BIG Inderct report group (Milwaukee Industrial Edition) ---
   OrgChart.templates.indirect_group = Object.assign({}, OrgChart.templates.group);
 
+  OrgChart.templates.indirect_group.node =
+    '<rect x="0" y="0" height="60" width="{w}" rx="0" ry="0" fill="#828282" stroke="#1e90ff" stroke-width="4" stroke-dasharray="10" filter="url(#mil-shadow)"></rect>' +
+    '<rect x="0" y="0" height="8" width="{w}" fill="#DB011C"></rect>';
+
+
   OrgChart.templates.indirect_group.link =
-    '<path stroke-linejoin="round" stroke="#1e90ff" stroke-width="2px" stroke-dasharray="6,6" fill="none" d="M{xa},{ya} {xb},{yb} {xc},{yc} L{xd},{yd}" />';
+    '<path stroke-linejoin="round" stroke="#1e90ff" stroke-width="4px" stroke-dasharray="10" fill="none" d="M{xa},{ya} {xb},{yb} {xc},{yc} L{xd},{yd}" />';
 }
 
 

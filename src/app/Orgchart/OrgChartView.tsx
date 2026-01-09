@@ -163,7 +163,15 @@ export default function OrgChartView({ selectedGroup, selectedType }: OrgChartPr
       ...n,
       tags: Array.isArray(n.tags) ? n.tags : [],
       img: n.image || "",
-    }));
+    })).sort((a: any, b: any) => {                                   // indirect_group > group > Employee
+      const getWeight = (node: any) => {
+        const tags = node.tags || [];
+        if (tags.includes('indirect_group')) return 2;
+        if (tags.includes('group')) return 1;
+        return 0; // Employees
+      };
+      return getWeight(a) - getWeight(b);
+    });
 
     // If chart already exists, just update the data instead of recreating
     if (chartRef.current) {
@@ -207,6 +215,9 @@ export default function OrgChartView({ selectedGroup, selectedType }: OrgChartPr
       tags: {
         group: {
           template: "group",
+        },
+        indirect_group: {
+          template: "indirect_group",
         },
         Emp_probation: {
           template: "big_v2",
