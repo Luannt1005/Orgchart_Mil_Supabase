@@ -134,13 +134,15 @@ interface SheetManagerProps {
   enableApproval?: boolean;
   enableSync?: boolean;
   enableDeleteAll?: boolean;
+  enableAddEntry?: boolean;
 }
 
 const SheetManager = ({
   initialShowApprovalOnly = false,
   enableApproval = true,
   enableSync = true,
-  enableDeleteAll = true
+  enableDeleteAll = true,
+  enableAddEntry = true
 }: SheetManagerProps) => {
 
   // Pagination state
@@ -161,6 +163,11 @@ const SheetManager = ({
 
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<{
+    show: boolean;
+    type: 'approve' | 'reject' | null;
+    count: number;
+  }>({ show: false, type: null, count: 0 });
 
   // Debounce logic
   useEffect(() => {
@@ -467,14 +474,18 @@ const SheetManager = ({
   };
 
   const handleRejectAll = async () => {
-    const pendingCount = pendingApprovals.length;
+    console.log('handleRejectAll called, totalRecords:', totalRecords);
+    const pendingCount = totalRecords;
     if (pendingCount === 0) {
       setError("No pending requests to reject.");
       setTimeout(() => setError(null), 3000);
       return;
     }
-    if (!window.confirm(`⚠️ Reject all ${pendingCount} pending requests?`)) return;
+    // Show confirm modal instead of window.confirm
+    setConfirmModal({ show: true, type: 'reject', count: pendingCount });
+  };
 
+  const executeRejectAll = async () => {
     setSaving(true);
     try {
       const response = await fetch("/api/sheet", {
@@ -498,14 +509,18 @@ const SheetManager = ({
   };
 
   const handleApproveAll = async () => {
-    const pendingCount = pendingApprovals.length;
+    console.log('handleApproveAll called, totalRecords:', totalRecords);
+    const pendingCount = totalRecords;
     if (pendingCount === 0) {
       setError("No pending requests to approve.");
       setTimeout(() => setError(null), 3000);
       return;
     }
-    if (!window.confirm(`✅ Approve all ${pendingCount} pending requests?`)) return;
+    // Show confirm modal instead of window.confirm
+    setConfirmModal({ show: true, type: 'approve', count: pendingCount });
+  };
 
+  const executeApproveAll = async () => {
     setSaving(true);
     try {
       const response = await fetch("/api/sheet", {
@@ -526,6 +541,15 @@ const SheetManager = ({
       setError("Error approving all.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleConfirmAction = async () => {
+    setConfirmModal({ show: false, type: null, count: 0 });
+    if (confirmModal.type === 'approve') {
+      await executeApproveAll();
+    } else if (confirmModal.type === 'reject') {
+      await executeRejectAll();
     }
   };
 
@@ -578,38 +602,33 @@ const SheetManager = ({
           )}
         </div>
         <div className="flex items-center gap-3">
-          {enableApproval && (
-            <button
-              onClick={() => {
-                setShowApprovalOnly(!showApprovalOnly);
-                setCurrentPage(1);
-              }}
-              className={`${styles.btnReset} flex items-center gap-2`}
-              style={{ backgroundColor: showApprovalOnly ? '#f59e0b' : '#6c757d' }}
-            >
-              <ClockIcon className="w-4 h-4" />
-              {showApprovalOnly ? 'Show All' : 'Review Changes'}
-              {pendingApprovals.length > 0 && !showApprovalOnly && (
-                <span className="ml-1 bg-red-500 text-white text-[10px] px-1.5 rounded-full">
-                  {pendingApprovals.length}
-                </span>
-              )}
-            </button>
+          {/* Show pending count badge when in approval mode */}
+          {enableApproval && showApprovalOnly && pendingApprovals.length > 0 && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
+              <ClockIcon className="w-4 h-4 text-amber-600" />
+              <span className="text-sm font-medium text-amber-700">
+                {pendingApprovals.length} Pending Changes
+              </span>
+            </div>
           )}
 
-          <button onClick={handleAddRow} className={styles.btnCreate}>
-            <PlusIcon className="w-4 h-4 inline mr-1" />
-            Add Entry
-          </button>
+          {enableAddEntry && (
+            <>
+              <button onClick={handleAddRow} className={styles.btnCreate}>
+                <PlusIcon className="w-4 h-4 inline mr-1" />
+                Add Entry
+              </button>
 
-          <button
-            onClick={handleSaveAll}
-            disabled={saving || modifiedRows.size === 0}
-            className={styles.btnSaveAll}
-          >
-            {saving ? <ArrowPathIcon className="w-4 h-4 animate-spin inline mr-1" /> : <ArrowDownTrayIcon className="w-4 h-4 inline mr-1" />}
-            Save ({modifiedRows.size})
-          </button>
+              <button
+                onClick={handleSaveAll}
+                disabled={saving || modifiedRows.size === 0}
+                className={styles.btnSaveAll}
+              >
+                {saving ? <ArrowPathIcon className="w-4 h-4 animate-spin inline mr-1" /> : <ArrowDownTrayIcon className="w-4 h-4 inline mr-1" />}
+                Save ({modifiedRows.size})
+              </button>
+            </>
+          )}
 
           {enableSync && (
             <button
@@ -639,7 +658,7 @@ const SheetManager = ({
             </button>
           )}
 
-          {showApprovalOnly && pendingApprovals.length > 0 && (
+          {showApprovalOnly && totalRecords > 0 && (
             <>
               <button
                 onClick={handleApproveAll}
@@ -648,7 +667,7 @@ const SheetManager = ({
                 style={{ backgroundColor: '#22c55e' }}
               >
                 <CheckCircleIcon className="w-4 h-4" />
-                Approve All ({pendingApprovals.length})
+                Approve All ({totalRecords})
               </button>
               <button
                 onClick={handleRejectAll}
@@ -657,7 +676,7 @@ const SheetManager = ({
                 style={{ backgroundColor: '#f97316' }}
               >
                 <NoSymbolIcon className="w-4 h-4" />
-                Reject All ({pendingApprovals.length})
+                Reject All ({totalRecords})
               </button>
             </>
           )}
@@ -729,7 +748,7 @@ const SheetManager = ({
             })}
             <div className="flex items-end">
               <button
-                onClick={() => { setFilters({}); setShowApprovalOnly(false); }}
+                onClick={() => { setFilters({}); }}
                 className={styles.btnReset}
               >
                 Clear
@@ -873,6 +892,55 @@ const SheetManager = ({
           </div>
         </div>
       </div>
+
+      {/* Confirm Modal for Approve All / Reject All */}
+      {confirmModal.show && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center gap-3 mb-4">
+              {confirmModal.type === 'approve' ? (
+                <div className="p-3 bg-green-100 rounded-full">
+                  <CheckCircleIcon className="w-6 h-6 text-green-600" />
+                </div>
+              ) : (
+                <div className="p-3 bg-orange-100 rounded-full">
+                  <NoSymbolIcon className="w-6 h-6 text-orange-600" />
+                </div>
+              )}
+              <h3 className="text-lg font-semibold text-gray-900">
+                {confirmModal.type === 'approve' ? 'Approve All Changes' : 'Reject All Changes'}
+              </h3>
+            </div>
+
+            <p className="text-gray-600 mb-6">
+              {confirmModal.type === 'approve'
+                ? `Are you sure you want to approve all ${confirmModal.count} pending changes? This will apply the new Line Manager values.`
+                : `Are you sure you want to reject all ${confirmModal.count} pending changes? The original Line Manager values will be kept.`
+              }
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmModal({ show: false, type: null, count: 0 })}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmAction}
+                disabled={saving}
+                className={`px-4 py-2 text-white rounded-lg transition-colors flex items-center gap-2 ${confirmModal.type === 'approve'
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : 'bg-orange-600 hover:bg-orange-700'
+                  }`}
+              >
+                {saving && <ArrowPathIcon className="w-4 h-4 animate-spin" />}
+                {confirmModal.type === 'approve' ? 'Yes, Approve All' : 'Yes, Reject All'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SheetAddModal
         isOpen={showAddModal}

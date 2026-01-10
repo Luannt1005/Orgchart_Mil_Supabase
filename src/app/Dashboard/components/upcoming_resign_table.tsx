@@ -58,10 +58,10 @@ const UpcomingResignTable: React.FC<UpcomingResignTableProps> = ({ className, no
         }
 
         const parts = [];
-        if (years > 0) parts.push(`${years}y`);
-        if (months > 0) parts.push(`${months}m`);
-        if (years === 0 && months === 0) parts.push('<1m');
+        if (years > 0) parts.push(years === 1 ? '1 year' : `${years} years`);
+        if (months > 0) parts.push(months === 1 ? '1 month' : `${months} months`);
 
+        if (parts.length === 0) return '0 months';
         return parts.join(' ');
     };
 

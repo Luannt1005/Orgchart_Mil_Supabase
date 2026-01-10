@@ -46,9 +46,14 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ className, filter, nodes,
         if (now.getDate() < startDate.getDate()) months--;
         if (months < 0) { years--; months += 12; }
 
-        if (years <= 0 && months <= 0) return "0M";
-        if (years > 0) return `${years}Y ${months}M`;
-        return `${months}M`;
+        if (years <= 0 && months <= 0) return "0 months";
+
+        const yStr = years > 0 ? `${years} year${years > 1 ? 's' : ''}` : '';
+        const mStr = months > 0 ? `${months} month${months > 1 ? 's' : ''}` : '';
+
+        if (years > 0 && months > 0) return `${yStr} ${mStr}`;
+        if (years > 0) return yStr;
+        return mStr;
     };
 
     // Process and filter employee data
@@ -84,9 +89,9 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ className, filter, nodes,
                 filtered = filtered.filter(emp => {
                     const expStr = emp.experience;
                     let totalMonths = 0;
-                    const yearMatch = expStr.match(/(\d+)Y/);
+                    const yearMatch = expStr.match(/(\d+)\s*year/);
                     if (yearMatch) totalMonths += parseInt(yearMatch[1]) * 12;
-                    const monthMatch = expStr.match(/(\d+)M/);
+                    const monthMatch = expStr.match(/(\d+)\s*month/);
                     if (monthMatch) totalMonths += parseInt(monthMatch[1]);
                     return totalMonths >= min && totalMonths < max;
                 });
@@ -203,7 +208,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({ className, filter, nodes,
 
                                 {/* Tenure */}
                                 <td className="px-2 text-center">
-                                    <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-medium ${emp.experience.includes('Y')
+                                    <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-medium ${emp.experience.includes('year')
                                         ? 'bg-purple-50 text-purple-700'
                                         : 'bg-gray-100 text-gray-600'
                                         }`}>

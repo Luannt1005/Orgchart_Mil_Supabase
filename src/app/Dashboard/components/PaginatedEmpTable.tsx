@@ -55,9 +55,14 @@ const PaginatedEmployeeTable: React.FC<PaginatedEmployeeTableProps> = ({
         if (now.getDate() < startDate.getDate()) months--;
         if (months < 0) { years--; months += 12; }
 
-        if (years <= 0 && months <= 0) return "0M";
-        if (years > 0) return `${years}Y ${months}M`;
-        return `${months}M`;
+        if (years <= 0 && months <= 0) return "0 months";
+
+        const yStr = years > 0 ? `${years} year${years > 1 ? 's' : ''}` : '';
+        const mStr = months > 0 ? `${months} month${months > 1 ? 's' : ''}` : '';
+
+        if (years > 0 && months > 0) return `${yStr} ${mStr}`;
+        if (years > 0) return yStr;
+        return mStr;
     };
 
     // Transform nodes to display format
@@ -154,7 +159,7 @@ const PaginatedEmployeeTable: React.FC<PaginatedEmployeeTableProps> = ({
 
                                 {/* Tenure */}
                                 <td className="px-2 text-center">
-                                    <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-medium ${emp.experience.includes('Y')
+                                    <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-medium ${emp.experience.includes('year')
                                         ? 'bg-purple-50 text-purple-700'
                                         : 'bg-gray-100 text-gray-600'
                                         }`}>

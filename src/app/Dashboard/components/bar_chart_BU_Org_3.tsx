@@ -28,7 +28,8 @@ const BUOrg3Chart: React.FC<BUOrg3ChartProps> = ({ className, nodes, loading = f
         // Return all departments
         return Object.entries(groupedData)
             .map(([name, count]) => ({
-                name: name.length > 12 ? name.slice(0, 12) + '...' : name,
+                // Truncate less aggressively: 25 chars
+                name: name.length > 25 ? name.slice(0, 25) + '...' : name,
                 fullName: name,
                 count
             }))
@@ -73,7 +74,7 @@ const BUOrg3Chart: React.FC<BUOrg3ChartProps> = ({ className, nodes, loading = f
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         data={chartData}
-                        margin={{ top: 5, right: 10, left: 10, bottom: 15 }}
+                        margin={{ top: 5, right: 10, left: 10, bottom: 40 }} // Increased bottom margin
                     >
                         <defs>
                             <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
@@ -85,7 +86,7 @@ const BUOrg3Chart: React.FC<BUOrg3ChartProps> = ({ className, nodes, loading = f
                             dataKey="name"
                             angle={-35}
                             textAnchor="end"
-                            height={45}
+                            height={60} // Increased height for rotated labels
                             interval={0}
                             tick={{
                                 fill: '#1E293B',

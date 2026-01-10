@@ -33,6 +33,16 @@ export default function Header() {
             }
         }
 
+        // Initialize dark mode from sync or local storage
+        const storedTheme = localStorage.getItem('theme');
+        if (storedTheme === 'dark' || (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            setIsDarkMode(true);
+            document.documentElement.classList.add('dark');
+        } else {
+            setIsDarkMode(false);
+            document.documentElement.classList.remove('dark');
+        }
+
         // Close dropdown when clicking outside
         function handleClickOutside(event: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -42,6 +52,20 @@ export default function Header() {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    const toggleDarkMode = () => {
+        setIsDarkMode(prev => {
+            const newMode = !prev;
+            if (newMode) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+            return newMode;
+        });
+    };
 
     const handleLogout = async () => {
         try {
@@ -86,7 +110,7 @@ export default function Header() {
                         {/* Dark Mode Toggle */}
                         <li>
                             <button
-                                onClick={() => setIsDarkMode(!isDarkMode)}
+                                onClick={toggleDarkMode}
                                 className="relative flex h-8.5 w-8.5 items-center justify-center rounded-full border-[0.5px] border-stroke bg-gray-100 hover:text-primary dark:border-strokedark dark:bg-meta-4 dark:text-white transition-all hover:bg-gray-200"
                             >
                                 {isDarkMode ? (

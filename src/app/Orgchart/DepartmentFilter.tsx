@@ -28,7 +28,7 @@ export default function DepartmentFilter({
         return (groups || []).filter((g): g is string => typeof g === 'string' && g.trim() !== '');
     }, [groups]);
 
-    const typeOptions = ['Staff', 'IDL', 'Group'];
+    const typeOptions = ['Staff', 'IDL'];
 
     // Handle clicking outside to close
     useEffect(() => {

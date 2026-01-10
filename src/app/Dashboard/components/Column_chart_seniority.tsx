@@ -23,19 +23,19 @@ const TENURE_BUCKETS = [
 // Colors
 const COLORS = {
     Staff: '#8B5CF6',  // Purple
-    IDL: '#F59E0B'     // Orange
+    IDL: '#0EA5E9'     // Sky Blue (Cyan-ish)
 };
 
 const SeniorityChart: React.FC<SeniorityChartProps> = ({ className, onFilterChange, nodes, loading = false }) => {
+    // ... (lines 30-100 skipped for brevity, keeping same)
     // Data is now passed from parent - no more independent fetching
     const error = null; // Error handling moved to parent
 
     // Helper function to calculate months from joining date
     const calculateMonthsFromDate = (joiningDate: string | number): number => {
         if (!joiningDate) return 0;
-
+        // ... (implementation of calculateMonthsFromDate)
         let startDate: Date;
-
         if (typeof joiningDate === "number" || /^\d+$/.test(String(joiningDate))) {
             const excelEpoch = new Date(1899, 11, 30);
             startDate = new Date(excelEpoch.getTime() + Number(joiningDate) * 86400000);
@@ -45,23 +45,18 @@ const SeniorityChart: React.FC<SeniorityChartProps> = ({ className, onFilterChan
         } else {
             startDate = new Date(joiningDate);
         }
-
         if (isNaN(startDate.getTime())) return 0;
-
         const now = new Date();
         let years = now.getFullYear() - startDate.getFullYear();
         let months = now.getMonth() - startDate.getMonth();
-
         if (now.getDate() < startDate.getDate()) months--;
         if (months < 0) { years--; months += 12; }
-
         return years * 12 + months;
     };
 
     // Process data
     const chartData = useMemo(() => {
         if (!nodes || nodes.length === 0) return [];
-
         const buckets = TENURE_BUCKETS.map(bucket => ({
             name: bucket.key,
             fullName: bucket.label,
@@ -71,14 +66,11 @@ const SeniorityChart: React.FC<SeniorityChartProps> = ({ className, onFilterChan
             min: bucket.min,
             max: bucket.max
         }));
-
         nodes.forEach((node: any) => {
             const joiningDate = node['Joining\r\n Date'] || node['Joining Date'] || '';
             if (!joiningDate) return;
-
             const dlIdlStaff = (node['DL/IDL/Staff'] || '').toLowerCase();
             const totalMonths = calculateMonthsFromDate(joiningDate);
-
             for (let i = 0; i < TENURE_BUCKETS.length; i++) {
                 const bucket = TENURE_BUCKETS[i];
                 if (totalMonths >= bucket.min && totalMonths < bucket.max) {
@@ -92,7 +84,6 @@ const SeniorityChart: React.FC<SeniorityChartProps> = ({ className, onFilterChan
                 }
             }
         });
-
         return buckets;
     }, [nodes]);
 
@@ -176,11 +167,11 @@ const SeniorityChart: React.FC<SeniorityChartProps> = ({ className, onFilterChan
                         <defs>
                             <linearGradient id="staffGradient" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor="#8B5CF6" stopOpacity={1} />
-                                <stop offset="100%" stopColor="#A78BFA" stopOpacity={1} />
+                                <stop offset="100%" stopColor="#C4B5FD" stopOpacity={1} />
                             </linearGradient>
                             <linearGradient id="idlGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#F59E0B" stopOpacity={1} />
-                                <stop offset="100%" stopColor="#FBBF24" stopOpacity={1} />
+                                <stop offset="0%" stopColor="#0EA5E9" stopOpacity={1} />
+                                <stop offset="100%" stopColor="#7DD3FC" stopOpacity={1} />
                             </linearGradient>
                         </defs>
                         <XAxis

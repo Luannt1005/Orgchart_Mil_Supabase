@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import UserManagement from "./components/UserManagement";
 import DataImport from "./components/DataImport";
 import SheetManagerTable from "@/components/SheetManagerTable";
@@ -9,12 +10,68 @@ import SheetManagerTable from "@/components/SheetManagerTable";
 import {
     UsersIcon,
     CloudArrowUpIcon,
-    ClipboardDocumentCheckIcon
+    TableCellsIcon,
+    ClipboardDocumentCheckIcon,
+    ClockIcon
 } from "@heroicons/react/24/outline";
 
 export default function AdminDashboard() {
-    type Tab = 'users' | 'import' | 'approvals';
-    const [activeTab, setActiveTab] = useState<Tab>('users');
+    type MainTab = 'users' | 'import' | 'approvals';
+    type ApprovalSubTab = 'allData' | 'reviewChanges';
+
+    const [activeTab, setActiveTab] = useState<MainTab>('users');
+    const [approvalSubTab, setApprovalSubTab] = useState<ApprovalSubTab>('allData');
+    const [pendingCount, setPendingCount] = useState<number>(0);
+    const [isAuthorized, setIsAuthorized] = useState(false);
+    const router = useRouter();
+
+    // specific check for admin role
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) {
+            router.push('/login');
+            return;
+        }
+        try {
+            const user = JSON.parse(storedUser);
+            if (user.role !== 'admin') {
+                router.push('/');
+            } else {
+                setIsAuthorized(true);
+            }
+        } catch (e) {
+            router.push('/login');
+        }
+    }, [router]);
+
+
+
+    // Fetch pending count for Review Changes badge
+    useEffect(() => {
+        const fetchPendingCount = async () => {
+            try {
+                // Use page=1 to ensure we go into paginated path that applies filters
+                const res = await fetch('/api/sheet?page=1&limit=1&lineManagerStatus=pending');
+                const data = await res.json();
+                if (data.success) {
+                    // Use total from paginated response which reflects the filtered count
+                    setPendingCount(data.total || 0);
+                }
+            } catch (err) {
+                console.error('Failed to fetch pending count:', err);
+            }
+        };
+
+        fetchPendingCount();
+
+        // Refresh pending count every 30 seconds
+        const interval = setInterval(fetchPendingCount, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    if (!isAuthorized) {
+        return null;
+    }
 
     return (
         <div className="min-h-screen bg-transparent font-sans text-slate-800 flex flex-col">
@@ -78,7 +135,7 @@ export default function AdminDashboard() {
 
             {/* Main Content */}
             <main className="flex-1 p-6 overflow-hidden">
-                <div className="h-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="h-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                     {activeTab === 'users' && (
                         <div className="h-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <UserManagement />
@@ -92,8 +149,61 @@ export default function AdminDashboard() {
                     )}
 
                     {activeTab === 'approvals' && (
-                        <div className="h-full overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <SheetManagerTable initialShowApprovalOnly={true} enableApproval={true} />
+                        <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            {/* Sub-tabs for Approvals */}
+                            <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 border-b border-gray-200 shrink-0">
+                                <button
+                                    onClick={() => setApprovalSubTab('allData')}
+                                    className={`
+                                        inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all
+                                        ${approvalSubTab === 'allData'
+                                            ? 'bg-white text-emerald-700 shadow-sm border border-gray-200'
+                                            : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'}
+                                    `}
+                                >
+                                    <TableCellsIcon className="w-4 h-4 mr-2" />
+                                    All Data
+                                </button>
+                                <button
+                                    onClick={() => setApprovalSubTab('reviewChanges')}
+                                    className={`
+                                        inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all
+                                        ${approvalSubTab === 'reviewChanges'
+                                            ? 'bg-white text-amber-700 shadow-sm border border-gray-200'
+                                            : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'}
+                                    `}
+                                >
+                                    <ClockIcon className="w-4 h-4 mr-2" />
+                                    Review Changes
+                                    {pendingCount > 0 && (
+                                        <span className="ml-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                            {pendingCount}
+                                        </span>
+                                    )}
+                                </button>
+                            </div>
+
+                            {/* Sub-tab content */}
+                            <div className="flex-1 overflow-hidden">
+                                {approvalSubTab === 'allData' && (
+                                    <SheetManagerTable
+                                        initialShowApprovalOnly={false}
+                                        enableApproval={false}
+                                        enableSync={true}
+                                        enableDeleteAll={true}
+                                        enableAddEntry={true}
+                                    />
+                                )}
+                                {approvalSubTab === 'reviewChanges' && (
+                                    <SheetManagerTable
+                                        initialShowApprovalOnly={true}
+                                        enableApproval={true}
+                                        enableSync={false}
+                                        enableDeleteAll={false}
+                                        enableAddEntry={false}
+                                    />
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

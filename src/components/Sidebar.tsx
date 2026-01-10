@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
     HomeIcon,
+    UserGroupIcon,
     ChartBarSquareIcon,
     CloudArrowUpIcon,
     TableCellsIcon,
@@ -28,14 +29,28 @@ export default function Sidebar() {
     const router = useRouter();
     const [isCollapsed, setIsCollapsed] = useState(false);
 
+    const [userRole, setUserRole] = useState<string | null>(null);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            try {
+                const user = JSON.parse(storedUser);
+                setUserRole(user.role || null);
+            } catch (e) {
+                // ignore error
+            }
+        }
+    }, []);
+
     const navItems = [
-        { name: 'Org Chart', path: '/Orgchart', icon: HomeIcon },
+        { name: 'Org Chart', path: '/Orgchart', icon: UserGroupIcon },
         { name: 'Dashboard', path: '/Dashboard', icon: ChartBarSquareIcon },
         // { name: 'Import HR Data', path: '/Import_HR_Data', icon: CloudArrowUpIcon },
         { name: 'Edit Table HR', path: '/SheetManager', icon: TableCellsIcon },
         { name: 'Customize Chart', path: '/Customize', icon: PencilSquareIcon },
-        { name: 'Admin Console', path: '/Admin', icon: Cog6ToothIcon },
-    ];
+        { name: 'Admin Console', path: '/Admin', icon: Cog6ToothIcon, requiredRole: 'admin' },
+    ].filter(item => !item.requiredRole || item.requiredRole === userRole);
 
     // Prefetch data when hovering over nav items
     const handleMouseEnter = useCallback((path: string) => {

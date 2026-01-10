@@ -147,33 +147,35 @@ const StatsCards: React.FC<StatsCardsProps> = ({ className, onFilterChange, acti
         };
     }, [nodes]);
 
-    // Job title cards - all 12 cards
+    // Order: High level to Low level
+    // Director -> Manager -> Supervisor -> Shift Leader -> Line Leader -> Engineer -> Specialist -> Coordinator -> Technician -> Operator -> WH Keeper -> Trainee
     const titleCards: CardInfo[] = [
-        { title: 'Operator', count: stats.operator, filterType: 'title', filterValue: 'operator' },
-        { title: 'Technician', count: stats.technician, filterType: 'title', filterValue: 'technician' },
-        { title: 'Specialist', count: stats.specialist, filterType: 'title', filterValue: 'specialist' },
-        { title: 'Supervisor', count: stats.supervisor, filterType: 'title', filterValue: 'supervisor' },
-        { title: 'Engineer', count: stats.engineer, filterType: 'title', filterValue: 'engineer' },
-        { title: 'Manager', count: stats.manager, filterType: 'title', filterValue: 'manager' },
-        { title: 'Coordinator', count: stats.coordinator, filterType: 'title', filterValue: 'coordinator' },
         { title: 'Director', count: stats.director, filterType: 'title', filterValue: 'director' },
+        { title: 'Manager', count: stats.manager, filterType: 'title', filterValue: 'manager' },
+        { title: 'Supervisor', count: stats.supervisor, filterType: 'title', filterValue: 'supervisor' },
         { title: 'Shift Leader', count: stats.shiftLeader, filterType: 'title', filterValue: 'shift leader' },
         { title: 'Line Leader', count: stats.lineLeader, filterType: 'title', filterValue: 'line leader' },
+        { title: 'Engineer', count: stats.engineer, filterType: 'title', filterValue: 'engineer' },
+        { title: 'Specialist', count: stats.specialist, filterType: 'title', filterValue: 'specialist' },
+        { title: 'Coordinator', count: stats.coordinator, filterType: 'title', filterValue: 'coordinator' },
+        { title: 'Technician', count: stats.technician, filterType: 'title', filterValue: 'technician' },
+        { title: 'Operator', count: stats.operator, filterType: 'title', filterValue: 'operator' },
         { title: 'WH Keeper', count: stats.warehouseKeeper, filterType: 'title', filterValue: 'warehouse keeper' },
         { title: 'Trainee', count: stats.trainee, filterType: 'title', filterValue: 'trainee' }
     ];
 
-    // Show cards: Sort by count, and hide zero/empty cards if a specific filter/hierarchy is active
+    // Show cards: Use the predefined hierarchical order.
     const visibleCards: CardInfo[] = useMemo(() => {
-        let sorted = [...titleCards].sort((a, b) => b.count - a.count);
+        // Just filter out zero counts if needed, but maintain order.
+        let sorted = [...titleCards];
 
-        // If a filter is active, or if we have significantly fewer total employees (implying a filtered view), hide zero counts
+        // If a filter is active, or if we have significantly fewer total employees, hide zero counts
         if (activeFilter?.type !== 'all' || isFiltered) {
             sorted = sorted.filter(c => c.count > 0);
         }
 
         return sorted;
-    }, [titleCards, activeFilter, stats.total, nodes.length]);
+    }, [titleCards, activeFilter, isFiltered]);
 
     if (error) {
         return (

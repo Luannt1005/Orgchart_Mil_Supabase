@@ -45,20 +45,73 @@ export default function OrgChartView({ selectedGroup, selectedType }: OrgChartPr
     if (selectedType && selectedType !== 'all') {
       const selectedTypes = selectedType.toLowerCase().split(',');
 
-      filteredRawNodes = filteredRawNodes.filter((item: any) => {
+      // Helper function to check if a node is a group
+      const isGroupNode = (item: any) => {
         const nodeType = (item.type || "").toLowerCase();
         const nodeTags = Array.isArray(item.tags)
           ? item.tags
           : typeof item.tags === 'string'
             ? JSON.parse(item.tags || '[]')
             : [];
+        return nodeType === 'group' || nodeTags.includes('group') || nodeTags.includes('indirect_group');
+      };
 
-        const isGroup = nodeType === 'group' || nodeTags.includes('group');
+      // Step 1: Filter nodes by selected types (IDL/Staff)
+      const matchingNodes = rawNodes.filter((item: any) => {
+        const nodeType = (item.type || "").toLowerCase();
+        // Only filter non-group nodes by type
+        if (!isGroupNode(item)) {
+          return selectedTypes.includes(nodeType);
+        }
+        return false;
+      });
 
-        if (isGroup) {
-          return selectedTypes.includes('group');
+      // Step 2: Collect all parent group IDs that contain matching nodes
+      const parentGroupIds = new Set<string | number>();
+      const visitedNodes = new Set<string | number>(); // Track visited nodes to prevent infinite recursion
+
+      const collectParentGroups = (nodeId: string | number | null | undefined, nodeStpid: string | number | null | undefined) => {
+        // Add direct parent (pid)
+        if (nodeId != null && !visitedNodes.has(nodeId)) {
+          visitedNodes.add(nodeId);
+          const parent = rawNodes.find((n: any) => n.id === nodeId);
+          if (parent) {
+            if (isGroupNode(parent)) {
+              parentGroupIds.add(parent.id);
+            }
+            // Continue up the tree
+            collectParentGroups(parent.pid, parent.stpid);
+          }
+        }
+        // Add stpid parent (group container)
+        if (nodeStpid != null && !visitedNodes.has(nodeStpid)) {
+          visitedNodes.add(nodeStpid);
+          const stpidParent = rawNodes.find((n: any) => n.id === nodeStpid);
+          if (stpidParent) {
+            if (isGroupNode(stpidParent)) {
+              parentGroupIds.add(stpidParent.id);
+            }
+            // Continue up the tree
+            collectParentGroups(stpidParent.pid, stpidParent.stpid);
+          }
+        }
+      };
+
+      matchingNodes.forEach((node: any) => {
+        visitedNodes.clear(); // Reset for each starting node
+        collectParentGroups(node.pid, node.stpid);
+      });
+
+      // Step 3: Include matching nodes + their parent groups
+      filteredRawNodes = rawNodes.filter((item: any) => {
+        const nodeType = (item.type || "").toLowerCase();
+
+        // Include groups that are parents of matching nodes
+        if (isGroupNode(item)) {
+          return parentGroupIds.has(item.id);
         }
 
+        // Include non-group nodes that match selected types
         return selectedTypes.includes(nodeType);
       });
     }

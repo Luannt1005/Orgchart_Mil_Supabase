@@ -60,9 +60,9 @@ export default function DashboardPage() {
         if (!selectedManagerId) {
             return nodes;
         }
-        const managerNode = nodes.find(n => String(n.id) === String(selectedManagerId));
         const subordinates = getSubordinatesRecursive(nodes, selectedManagerId);
-        return managerNode ? [managerNode, ...subordinates] : subordinates;
+        // User requested to NOT include the manager themself in the count/list when filtering by manager
+        return subordinates;
     }, [nodes, selectedManagerId]);
 
     // Calculate filtered nodes for charts

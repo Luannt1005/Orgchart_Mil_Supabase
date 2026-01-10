@@ -69,12 +69,22 @@ const Customize = () => {
     setLoadingChart(true);
     try {
       const response = await fetch(`/api/orgcharts/${selectedOrgId}`);
-      const res = await response.json();
+
+      // Read body as text ONCE to avoid "body stream already read" error
+      const responseText = await response.text();
+
+      // Try to parse as JSON
+      let res: any = null;
+      try {
+        res = JSON.parse(responseText);
+      } catch {
+        // Not valid JSON
+        res = null;
+      }
 
       // Handle 404 - orgchart not found (might have been deleted)
       if (response.status === 404) {
         console.warn(`Orgchart ${selectedOrgId} not found, it may have been deleted.`);
-        // Refresh the list to remove stale entries
         fetchOrgList();
         setOrgId("");
         return;
@@ -82,8 +92,22 @@ const Customize = () => {
 
       // Handle other errors
       if (!response.ok) {
-        console.error(`API error ${response.status}:`, res.error);
-        throw new Error(res.error || "Failed to fetch orgchart");
+        let errorMessage = `Failed to fetch chart: ${response.status} ${response.statusText}`;
+        if (res && res.error) {
+          errorMessage += ` - ${res.error}`;
+        }
+        if (res && res.details) {
+          console.error("Server Error Details:", res.details);
+        }
+        if (!res && responseText) {
+          errorMessage += ` (${responseText.substring(0, 100)})`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Success - use the parsed JSON
+      if (!res) {
+        throw new Error("Invalid JSON response from server");
       }
 
       const nodesData = res.org_data?.data || [];
@@ -184,6 +208,8 @@ const Customize = () => {
     try {
       // Fetch selected department data
       const deptRes = await fetch(`/api/orgchart?dept=${encodeURIComponent(selectedDept)}`);
+
+      if (!deptRes.ok) throw new Error("Failed to fetch department data");
       const deptJson = await deptRes.json();
       const nodes = deptJson.data || [];
 
@@ -206,8 +232,19 @@ const Customize = () => {
         })
       });
 
+      if (!response.ok) {
+        const errText = await response.text();
+        let errMessage = "Create failed";
+        try {
+          const errJson = JSON.parse(errText);
+          errMessage = errJson.error || errMessage;
+        } catch (e) {
+          errMessage += `: ${errText.substring(0, 50)}`;
+        }
+        throw new Error(errMessage);
+      }
+
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Create failed");
 
       alert(`✅ Đã tạo sơ đồ: ${newOrgName}`);
       setShowCreateModal(false);
@@ -290,9 +327,23 @@ const Customize = () => {
       })
     });
 
+    if (!response.ok) {
+      let errMessage = `Failed to save: ${response.status} ${response.statusText}`;
+      try {
+        const errText = await response.text();
+        try {
+          const errJson = JSON.parse(errText);
+          if (errJson.error) errMessage = errJson.error;
+        } catch {
+          if (errText) errMessage += ` (${errText.substring(0, 50)})`;
+        }
+      } catch { }
+      throw new Error(errMessage);
+    }
+
     const result = await response.json();
 
-    if (response.ok && result.success) {
+    if (result.success) {
       setLastSaveTime(new Date().toLocaleTimeString());
       setHasChanges(false);
       alert("✅ Đã lưu thay đổi thành công!");
@@ -318,9 +369,11 @@ const Customize = () => {
         method: "DELETE",
       });
 
-      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(`Delete failed: ${response.status} ${response.statusText}`);
+      }
 
-      if (!response.ok) throw new Error(result.error || "Delete failed");
+      const result = await response.json();
 
       alert("✅ Đã xóa hồ sơ thành công!");
 
