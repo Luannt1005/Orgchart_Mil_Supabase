@@ -218,7 +218,7 @@ export default function DashboardPage() {
                     <div className="col-span-5 flex flex-col gap-4 min-h-0 h-full">
 
                         {/* Employee Table (main) */}
-                        <div className="h-[65%] shrink-0 min-h-0 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
+                        <div className="flex-[2] min-h-0 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
                             <div className="px-4 pt-3 pb-2 shrink-0 flex items-center justify-between">
                                 <h2 className="text-[13px] font-bold text-[#0F172A]">
                                     Employee Roster
@@ -248,7 +248,7 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Upcoming Resignations */}
-                        <div className="h-[34%] shrink-0 min-h-0 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
+                        <div className="flex-[1] min-h-0 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
                             <div className="px-4 pt-3 pb-2 shrink-0">
                                 <h2 className="text-[13px] pl-1 font-bold text-[#0F172A]">
                                     Upcoming Resignations
