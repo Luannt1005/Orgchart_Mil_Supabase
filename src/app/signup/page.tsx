@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import "./signup.css";
+import styles from "./signup.module.css";
 
 // Supabase client
 import { supabase } from "@/lib/supabase";
@@ -101,12 +101,12 @@ export default function SignupPage() {
   // Success screen
   if (success) {
     return (
-      <div className="signup-container">
-        <div className="success-container">
-          <div className="success-icon">✓</div>
+      <div className={styles['signup-container']}>
+        <div className={styles['success-container']}>
+          <div className={styles['success-icon']}>✓</div>
           <h2>Tạo tài khoản thành công!</h2>
           <p>Chuyển hướng đến trang đăng nhập...</p>
-          <div className="spinner-dots">
+          <div className={styles['spinner-dots']}>
             <span></span>
             <span></span>
             <span></span>
@@ -114,18 +114,18 @@ export default function SignupPage() {
         </div>
 
         {/* Background Elements */}
-        <div className="bg-decoration bg-1"></div>
-        <div className="bg-decoration bg-2"></div>
+        <div className={`${styles['bg-decoration']} ${styles['bg-1']}`}></div>
+        <div className={`${styles['bg-decoration']} ${styles['bg-2']}`}></div>
       </div>
     );
   }
 
   return (
-    <div className="signup-container">
-      <div className="signup-card">
+    <div className={styles['signup-container']}>
+      <div className={styles['signup-card']}>
         {/* Logo */}
-        <div className="signup-logo">
-          <div className="logo-wrapper">
+        <div className={styles['signup-logo']}>
+          <div className={styles['logo-wrapper']}>
             <Image
               src="/Milwaukee-logo-red.png"
               width={200}
@@ -139,25 +139,25 @@ export default function SignupPage() {
         </div>
 
         {/* Header */}
-        <div className="signup-header">
+        <div className={styles['signup-header']}>
           <h1>Tạo Tài Khoản</h1>
           <p>Quản lý Sơ đồ Tổ chức</p>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="alert alert-error">
-            <span className="alert-icon">⚠️</span>
+          <div className={`${styles.alert} ${styles['alert-error']}`}>
+            <span className={styles['alert-icon']}>⚠️</span>
             <span>{error}</span>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="signup-form">
+        <form onSubmit={handleSubmit} className={styles['signup-form']}>
           {/* Full Name */}
-          <div className="form-group">
+          <div className={styles['form-group']}>
             <label htmlFor="fullName">Họ và tên</label>
-            <div className="input-wrapper">
+            <div className={styles['input-wrapper']}>
               <input
                 id="fullName"
                 type="text"
@@ -165,17 +165,17 @@ export default function SignupPage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 disabled={loading}
-                className="form-input"
+                className={styles['form-input']}
                 required
               />
-              <span className="input-icon">👤</span>
+              <span className={styles['input-icon']}>👤</span>
             </div>
           </div>
 
           {/* Username */}
-          <div className="form-group">
+          <div className={styles['form-group']}>
             <label htmlFor="username">Tên đăng nhập</label>
-            <div className="input-wrapper">
+            <div className={styles['input-wrapper']}>
               <input
                 id="username"
                 type="text"
@@ -183,17 +183,17 @@ export default function SignupPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={loading}
-                className="form-input"
+                className={styles['form-input']}
                 required
               />
-              <span className="input-icon">👤</span>
+              <span className={styles['input-icon']}>👤</span>
             </div>
           </div>
 
           {/* Password */}
-          <div className="form-group">
+          <div className={styles['form-group']}>
             <label htmlFor="password">Mật khẩu</label>
-            <div className="input-wrapper">
+            <div className={styles['input-wrapper']}>
               <input
                 id="password"
                 type="password"
@@ -201,17 +201,17 @@ export default function SignupPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
-                className="form-input"
+                className={styles['form-input']}
                 required
               />
-              <span className="input-icon">🔒</span>
+              <span className={styles['input-icon']}>🔒</span>
             </div>
           </div>
 
           {/* Confirm Password */}
-          <div className="form-group">
+          <div className={styles['form-group']}>
             <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
-            <div className="input-wrapper">
+            <div className={styles['input-wrapper']}>
               <input
                 id="confirmPassword"
                 type="password"
@@ -219,44 +219,44 @@ export default function SignupPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={loading}
-                className="form-input"
+                className={styles['form-input']}
                 required
               />
-              <span className="input-icon">🔒</span>
+              <span className={styles['input-icon']}>🔒</span>
             </div>
           </div>
 
           {/* Submit Button */}
-          <button type="submit" disabled={loading} className="signup-button">
+          <button type="submit" disabled={loading} className={styles['signup-button']}>
             {loading ? (
               <>
-                <span className="button-spinner"></span>
+                <span className={styles['button-spinner']}></span>
                 <span>Đang tạo...</span>
               </>
             ) : (
               <>
                 <span>Tạo Tài Khoản</span>
-                <span className="button-arrow">→</span>
+                <span className={styles['button-arrow']}>→</span>
               </>
             )}
           </button>
         </form>
 
         {/* Divider */}
-        <div className="divider-line"></div>
+        <div className={styles['divider-line']}></div>
 
         {/* Footer Links */}
-        <div className="signup-footer">
-          <span className="footer-text">Đã có tài khoản?</span>
-          <Link href="/login" className="footer-link">
+        <div className={styles['signup-footer']}>
+          <span className={styles['footer-text']}>Đã có tài khoản?</span>
+          <Link href="/login" className={styles['footer-link']}>
             Đăng nhập
           </Link>
         </div>
       </div>
 
       {/* Background Elements */}
-      <div className="bg-decoration bg-1"></div>
-      <div className="bg-decoration bg-2"></div>
+      <div className={`${styles['bg-decoration']} ${styles['bg-1']}`}></div>
+      <div className={`${styles['bg-decoration']} ${styles['bg-2']}`}></div>
     </div>
   );
 }

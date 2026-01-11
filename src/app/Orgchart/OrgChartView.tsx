@@ -5,7 +5,7 @@ import OrgChart from "@/lib/orgchart";
 import { patchOrgChartTemplates } from "./OrgChartTemplates";
 import LoadingScreen from "@/components/loading-screen";
 import { useFilteredOrgData } from "@/hooks/useOrgData";
-import "./OrgChart.css";
+import styles from "./OrgChart.module.css";
 
 interface OrgChartProps {
   selectedGroup?: string;
@@ -434,7 +434,7 @@ export default function OrgChartView({ selectedGroup, selectedType }: OrgChartPr
     <div
       id="tree"
       ref={treeRef}
-      style={{ width: "100%", height: "100vh" }}
+      className={styles.treeContainer}
     />
   );
 }

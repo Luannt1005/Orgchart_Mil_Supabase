@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import "./login.css";
+import styles from "./login.module.css";
 
 // Supabase client
 import { supabase } from "@/lib/supabase";
@@ -101,12 +101,12 @@ export default function LoginPage() {
   // Success screen
   if (success) {
     return (
-      <div className="login-container">
-        <div className="success-container">
-          <div className="success-icon">✓</div>
+      <div className={styles['login-container']}>
+        <div className={styles['success-container']}>
+          <div className={styles['success-icon']}>✓</div>
           <h2>Đăng nhập thành công!</h2>
           <p>Chào mừng quay lại</p>
-          <div className="spinner-dots">
+          <div className={styles['spinner-dots']}>
             <span></span>
             <span></span>
             <span></span>
@@ -117,11 +117,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="login-container">
-      <div className="login-card">
+    <div className={styles['login-container']}>
+      <div className={styles['login-card']}>
         {/* Logo */}
-        <div className="login-logo">
-          <div className="logo-wrapper">
+        <div className={styles['login-logo']}>
+          <div className={styles['logo-wrapper']}>
             <Image
               src="/Milwaukee-logo-red.png"
               width={200}
@@ -135,25 +135,25 @@ export default function LoginPage() {
         </div>
 
         {/* Header */}
-        <div className="login-header">
+        <div className={styles['login-header']}>
           <h1>Đăng Nhập</h1>
           <p>Quản lý Sơ đồ Tổ chức</p>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="alert alert-error">
-            <span className="alert-icon">⚠️</span>
+          <div className={`${styles.alert} ${styles['alert-error']}`}>
+            <span className={styles['alert-icon']}>⚠️</span>
             <span>{error}</span>
           </div>
         )}
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="login-form">
+        <form onSubmit={handleSubmit} className={styles['login-form']}>
           {/* Username Input */}
-          <div className="form-group">
+          <div className={styles['form-group']}>
             <label htmlFor="username">Tên đăng nhập</label>
-            <div className="input-wrapper">
+            <div className={styles['input-wrapper']}>
               <input
                 id="username"
                 type="text"
@@ -161,17 +161,17 @@ export default function LoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={loading}
-                className="form-input"
+                className={styles['form-input']}
                 required
               />
-              <span className="input-icon">👤</span>
+              <span className={styles['input-icon']}>👤</span>
             </div>
           </div>
 
           {/* Password Input */}
-          <div className="form-group">
+          <div className={styles['form-group']}>
             <label htmlFor="password">Mật khẩu</label>
-            <div className="input-wrapper">
+            <div className={styles['input-wrapper']}>
               <input
                 id="password"
                 type="password"
@@ -179,46 +179,46 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
-                className="form-input"
+                className={styles['form-input']}
                 required
               />
-              <span className="input-icon">🔒</span>
+              <span className={styles['input-icon']}>🔒</span>
             </div>
           </div>
 
           {/* Submit Button */}
-          <button type="submit" disabled={loading} className="login-button">
+          <button type="submit" disabled={loading} className={styles['login-button']}>
             {loading ? (
               <>
-                <span className="button-spinner"></span>
+                <span className={styles['button-spinner']}></span>
                 <span>Đang kiểm tra...</span>
               </>
             ) : (
               <>
                 <span>Đăng Nhập</span>
-                <span className="button-arrow">→</span>
+                <span className={styles['button-arrow']}>→</span>
               </>
             )}
           </button>
         </form>
 
         {/* Divider */}
-        <div className="divider-line"></div>
+        <div className={styles['divider-line']}></div>
 
         {/* Footer Links */}
-        <div className="login-footer">
-          <a href="#forgot" className="footer-link">
+        <div className={styles['login-footer']}>
+          <a href="#forgot" className={styles['footer-link']}>
             Quên mật khẩu?
           </a>
-          <a href="/signup" className="footer-link">
+          <a href="/signup" className={styles['footer-link']}>
             Tạo tài khoản
           </a>
         </div>
       </div>
 
       {/* Background Elements */}
-      <div className="bg-decoration bg-1"></div>
-      <div className="bg-decoration bg-2"></div>
+      <div className={`${styles['bg-decoration']} ${styles['bg-1']}`}></div>
+      <div className={`${styles['bg-decoration']} ${styles['bg-2']}`}></div>
     </div>
   );
 }

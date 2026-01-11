@@ -1,6 +1,7 @@
-/* ==================== SIGNUP PAGE ==================== */
+/* ==================== LOGIN PAGE ==================== */
 
-:root {
+.login-container {
+  /* Local Variables */
   --mwk-primary: #bd011c;
   --mwk-dark: #8a010f;
   --mwk-light: #f8f9fa;
@@ -9,15 +10,7 @@
   --mwk-text-light: #666666;
   --mwk-success: #10b981;
   --mwk-error: #ef4444;
-}
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.signup-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -28,7 +21,6 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
-  padding: 16px;
 }
 
 /* ==================== BACKGROUND DECORATIONS ==================== */
@@ -70,9 +62,9 @@
   }
 }
 
-/* ==================== SIGNUP CARD ==================== */
+/* ==================== LOGIN CARD ==================== */
 
-.signup-card {
+.login-card {
   position: relative;
   z-index: 10;
   background: white;
@@ -80,7 +72,7 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   padding: 60px 40px;
   width: 100%;
-  max-width: 450px;
+  max-width: 420px;
   animation: slideUp 0.6s ease-out;
 }
 
@@ -98,7 +90,7 @@
 
 /* ==================== LOGO ==================== */
 
-.signup-logo {
+.login-logo {
   text-align: center;
   margin-bottom: 40px;
 }
@@ -108,7 +100,7 @@
   animation: fadeIn 0.8s ease-out 0.2s both;
 }
 
-.signup-logo img {
+.login-logo img {
   max-width: 400px;
   height: auto;
   display: block;
@@ -126,12 +118,12 @@
 
 /* ==================== HEADER ==================== */
 
-.signup-header {
+.login-header {
   text-align: center;
   margin-bottom: 35px;
 }
 
-.signup-header h1 {
+.login-header h1 {
   font-size: 28px;
   font-weight: 700;
   color: var(--mwk-text);
@@ -139,7 +131,7 @@
   letter-spacing: -0.5px;
 }
 
-.signup-header p {
+.login-header p {
   font-size: 14px;
   color: var(--mwk-text-light);
   font-weight: 500;
@@ -187,7 +179,7 @@
 
 /* ==================== FORM ==================== */
 
-.signup-form {
+.login-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -252,9 +244,9 @@
   opacity: 0.7;
 }
 
-/* ==================== SIGNUP BUTTON ==================== */
+/* ==================== LOGIN BUTTON ==================== */
 
-.signup-button {
+.login-button {
   padding: 14px 24px;
   font-size: 15px;
   font-weight: 600;
@@ -276,16 +268,16 @@
   overflow: hidden;
 }
 
-.signup-button:hover:not(:disabled) {
+.login-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(189, 1, 28, 0.4);
 }
 
-.signup-button:active:not(:disabled) {
+.login-button:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.signup-button:disabled {
+.login-button:disabled {
   opacity: 0.8;
   cursor: not-allowed;
 }
@@ -296,7 +288,7 @@
   font-size: 18px;
 }
 
-.signup-button:hover:not(:disabled) .button-arrow {
+.login-button:hover:not(:disabled) .button-arrow {
   transform: translateX(4px);
 }
 
@@ -327,16 +319,11 @@
 
 /* ==================== FOOTER LINKS ==================== */
 
-.signup-footer {
+.login-footer {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 16px;
   flex-wrap: wrap;
-  font-size: 13px;
-}
-
-.footer-text {
-  color: var(--mwk-text-light);
 }
 
 .footer-link {
@@ -370,8 +357,6 @@
 /* ==================== SUCCESS SCREEN ==================== */
 
 .success-container {
-  position: relative;
-  z-index: 10;
   text-align: center;
   padding: 60px 40px;
   background: white;
@@ -461,35 +446,33 @@
 /* ==================== RESPONSIVE ==================== */
 
 @media (max-width: 480px) {
-  .signup-card {
+  .login-card {
     padding: 40px 24px;
     margin: 16px;
-    max-width: 100%;
   }
 
-  .signup-header h1 {
+  .login-header h1 {
     font-size: 24px;
   }
 
   .form-input {
     font-size: 16px;
     padding: 12px 14px;
-    padding-right: 40px;
   }
 
-  .signup-button {
+  .login-button {
     padding: 12px 20px;
     font-size: 14px;
   }
 
-  .signup-footer {
+  .login-footer {
     flex-direction: column;
-    gap: 8px;
-    text-align: center;
+    gap: 12px;
   }
 
   .footer-link {
-    display: inline-block;
+    display: block;
+    text-align: center;
   }
 
   .footer-link::after {
@@ -503,7 +486,6 @@
   .success-container {
     padding: 40px 24px;
     margin: 16px;
-    max-width: 100%;
   }
 
   .success-icon {
@@ -518,16 +500,16 @@
 }
 
 @media (max-width: 360px) {
-  .signup-card {
+  .login-card {
     padding: 32px 16px;
     max-width: 100%;
   }
 
-  .signup-header h1 {
+  .login-header h1 {
     font-size: 20px;
   }
 
-  .signup-header p {
+  .login-header p {
     font-size: 13px;
   }
 

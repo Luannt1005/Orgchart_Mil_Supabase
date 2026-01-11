@@ -12,7 +12,7 @@ import UpcomingResignTable from './components/upcoming_resign_table';
 import ManagerFilter from './components/ManagerFilter';
 import TitleFilter from './components/TitleFilter';
 import { useSheetData, getSubordinatesRecursive } from '@/hooks/useSheetData';
-import './design-tokens.css';
+
 
 export interface EmployeeFilter {
     type: 'all' | 'staff' | 'idl' | 'title' | 'tenure' | 'type';
