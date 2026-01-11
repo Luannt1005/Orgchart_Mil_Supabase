@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import AppFooter from "@/components/app.footer";
 import PageTransition from "@/components/PageTransition";
+import { UserProvider } from "@/app/context/UserContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,18 +33,20 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} bg-gray-50`}
         suppressHydrationWarning
       >
-        <div className="flex w-full h-screen overflow-hidden">
-          <Sidebar />
-          <div className="flex-1 flex flex-col min-w-0 h-full">
-            <Header />
-            <main className="flex-1 overflow-auto bg-gray-200 relative p-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent">
-              <PageTransition>
-                {children}
-              </PageTransition>
-            </main>
+        <UserProvider>
+          <div className="flex w-full h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col min-w-0 h-full">
+              <Header />
+              <main className="flex-1 overflow-auto bg-gray-200 relative p-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent">
+                <PageTransition>
+                  {children}
+                </PageTransition>
+              </main>
+            </div>
           </div>
-        </div>
-        <AppFooter />
+          <AppFooter />
+        </UserProvider>
       </body>
     </html>
   );

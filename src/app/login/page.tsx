@@ -9,6 +9,7 @@ import styles from "./login.module.css";
 // Supabase client
 import { supabase } from "@/lib/supabase";
 import { verifyPassword } from "@/lib/password";
+import { useUser } from "@/app/context/UserContext";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const { setUser } = useUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,8 +76,11 @@ export default function LoginPage() {
         throw new Error("Failed to create session");
       }
 
-      // 6. Save user info to localStorage (for UI)
-      localStorage.setItem("user", JSON.stringify(userInfo));
+      // 6. Save user info to localStorage and context for UI
+      // Note: setUser in our context also updates localStorage, but doing it explicitly here first 
+      // doesn't hurt and ensures it's available.
+      // Actually, relying on setUser context is cleaner if available.
+      setUser(userInfo);
 
       // ✅ Show success animation
       setSuccess(true);

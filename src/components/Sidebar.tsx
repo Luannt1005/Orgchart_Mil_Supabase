@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useUser } from '@/app/context/UserContext';
 import { usePathname, useRouter } from 'next/navigation';
 import {
     HomeIcon,
@@ -29,19 +30,8 @@ export default function Sidebar() {
     const router = useRouter();
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    const [userRole, setUserRole] = useState<string | null>(null);
-
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            try {
-                const user = JSON.parse(storedUser);
-                setUserRole(user.role || null);
-            } catch (e) {
-                // ignore error
-            }
-        }
-    }, []);
+    const { user } = useUser();
+    const userRole = user?.role || null;
 
     const navItems = [
         { name: 'Org Chart', path: '/Orgchart', icon: UserGroupIcon },

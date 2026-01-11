@@ -5,7 +5,7 @@ import OrgChart from "@/lib/orgchart";
 import { useOrgData } from "@/hooks/useOrgData";
 import LoadingScreen from "@/components/loading-screen";
 import { patchOrgChartTemplates } from "../Orgchart/OrgChartTemplates";
-import "../Orgchart/OrgChart.css";
+import styles from "../Orgchart/OrgChart.module.css";
 
 const Customize = () => {
   const chartRef = useRef<HTMLDivElement>(null);
@@ -507,7 +507,7 @@ const Customize = () => {
         )}
 
         {/* Chart Container */}
-        <div ref={chartRef} className="relative z-10 h-full w-full" />
+        <div ref={chartRef} className={`${styles.treeContainer} relative z-10 h-full w-full`} />
 
         {/* Loading Overlay for Chart Operations */}
         {loadingChart && (

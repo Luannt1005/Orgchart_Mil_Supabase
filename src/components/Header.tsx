@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useUser } from "@/app/context/UserContext";
 import {
     MagnifyingGlassIcon,
     BellIcon,
@@ -15,24 +16,12 @@ import { usePathname } from "next/navigation";
 
 export default function Header() {
     const pathname = usePathname();
-    const [user, setUser] = useState<{ username: string; full_name: string; role?: string } | null>(null);
+    const { user } = useUser();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [isDarkMode, setIsDarkMode] = useState(false);
 
-
-
     useEffect(() => {
-        // Load user from local storage
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            try {
-                setUser(JSON.parse(storedUser));
-            } catch (e) {
-                console.error('Failed to parse user', e);
-            }
-        }
-
         // Initialize dark mode from sync or local storage
         const storedTheme = localStorage.getItem('theme');
         if (storedTheme === 'dark' || (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
