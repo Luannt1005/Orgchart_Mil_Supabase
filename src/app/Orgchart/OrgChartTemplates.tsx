@@ -131,7 +131,8 @@ export function patchOrgChartTemplates() {
     OrgChart.templates.group = Object.assign({}, OrgChart.templates.ana);
   }
 
-  OrgChart.templates.group.size = [500, 50];
+  OrgChart.templates.group.size = [500, 60];
+  OrgChart.templates.group.padding = [70, 10, 1, 10];
 
   OrgChart.templates.group.node =
     '<rect x="0" y="0" height="60" width="{w}" rx="0" ry="0" fill="#828282" stroke="#000" stroke-width="4" filter="url(#mil-shadow)"></rect>' +

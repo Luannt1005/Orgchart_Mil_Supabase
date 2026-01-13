@@ -258,7 +258,8 @@ const Customize = () => {
         const droppedTags = Array.isArray(droppedNode.tags) ? droppedNode.tags : [];
         const draggedTags = Array.isArray(draggedNode.tags) ? draggedNode.tags : [];
 
-        if (droppedTags.includes("group") && !draggedTags.includes("group")) {
+        // if (droppedTags.includes("group") && !draggedTags.includes("group")) {
+        if (droppedTags.includes("group")) {
           // Use setTimeout to override AFTER default behavior sets pid
           setTimeout(() => {
             const draggedNodeData = sender.get(draggedNode.id);
