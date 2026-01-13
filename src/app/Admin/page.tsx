@@ -189,7 +189,7 @@ export default function AdminDashboard() {
                                     <SheetManagerTable
                                         initialShowApprovalOnly={false}
                                         enableApproval={false}
-                                        enableSync={true}
+
                                         enableDeleteAll={true}
                                         enableAddEntry={true}
                                     />
@@ -198,7 +198,7 @@ export default function AdminDashboard() {
                                     <SheetManagerTable
                                         initialShowApprovalOnly={true}
                                         enableApproval={true}
-                                        enableSync={false}
+
                                         enableDeleteAll={false}
                                         enableAddEntry={false}
                                     />

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getCachedData, invalidateCachePrefix } from "@/lib/cache";
-import { syncSingleEmployee } from "@/lib/orgchart-sync";
+
 import { retryOperation } from "@/lib/retry";
 
 // Cache TTL: 15 minutes for employee list
@@ -344,12 +344,7 @@ export async function POST(req: Request) {
 
       invalidateCachePrefix('employees');
 
-      // Sync to OrgChart asynchronously
-      if (inserted && inserted.id) {
-        syncSingleEmployee(inserted.id).then((res: any) => {
-          console.log(`Async sync result for ${inserted.id}:`, res);
-        }).catch((err: any) => console.error("Async sync failed:", err));
-      }
+
 
       return NextResponse.json({
         success: true,
@@ -509,10 +504,7 @@ export async function PUT(req: Request) {
 
     invalidateCachePrefix('employees');
 
-    // Sync to OrgChart asynchronously
-    syncSingleEmployee(id).then((res: any) => {
-      console.log(`Async sync result for ${id}:`, res);
-    }).catch((err: any) => console.error("Async sync failed:", err));
+
 
     return NextResponse.json({
       success: true,

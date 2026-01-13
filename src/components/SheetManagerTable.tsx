@@ -132,7 +132,6 @@ const formatDateToISO = (value: string): string => {
 interface SheetManagerProps {
   initialShowApprovalOnly?: boolean;
   enableApproval?: boolean;
-  enableSync?: boolean;
   enableDeleteAll?: boolean;
   enableAddEntry?: boolean;
 }
@@ -140,7 +139,6 @@ interface SheetManagerProps {
 const SheetManager = ({
   initialShowApprovalOnly = false,
   enableApproval = true,
-  enableSync = true,
   enableDeleteAll = true,
   enableAddEntry = true
 }: SheetManagerProps) => {
@@ -323,19 +321,7 @@ const SheetManager = ({
 
       if (result.success) {
         const newEmpId = formData["Emp ID"];
-        if (newEmpId) {
-          try {
-            await fetch("/api/sync-orgchart", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ employeeId: newEmpId })
-            });
-          } catch (syncErr) {
-            console.warn("Auto-sync failed", syncErr);
-          }
-        }
-
-        setSuccessMessage("✅ New employee added & synced successfully");
+        setSuccessMessage("✅ New employee added successfully");
         await mutate();
         setTimeout(() => setSuccessMessage(null), 3000);
         return true;
@@ -428,14 +414,7 @@ const SheetManager = ({
 
       const result = await response.json();
       if (result.success) {
-        if (action === 'approve') {
-          await fetch("/api/sync-orgchart", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ employeeId: rowId })
-          });
-        }
-        setSuccessMessage(action === 'approve' ? "Changes approved & synced." : "Request rejected.");
+        setSuccessMessage(action === 'approve' ? "Changes approved." : "Request rejected.");
         await mutate();
         setTimeout(() => setSuccessMessage(null), 3000);
       }
@@ -457,9 +436,6 @@ const SheetManager = ({
       const result = await response.json();
 
       if (result.success) {
-        // Trigger proper sync to remove from OrgChart
-        await fetch("/api/sync-orgchart", { method: "POST" });
-
         setSuccessMessage(`Deleted "${empName}" successfully.`);
         await mutate();
         setTimeout(() => setSuccessMessage(null), 3000);
@@ -530,7 +506,6 @@ const SheetManager = ({
       });
       const result = await response.json();
       if (result.success) {
-        await fetch("/api/sync-orgchart", { method: "POST" });
         setSuccessMessage(`✓ Approved ${result.count} requests.`);
         await mutate();
         setTimeout(() => setSuccessMessage(null), 4000);
@@ -630,33 +605,7 @@ const SheetManager = ({
             </>
           )}
 
-          {enableSync && (
-            <button
-              onClick={async () => {
-                try {
-                  setSaving(true);
-                  const res = await fetch("/api/sync-orgchart", { method: "POST" });
-                  const result = await res.json();
-                  if (result.success) {
-                    setSuccessMessage("OrgChart synced successfully!");
-                    setTimeout(() => setSuccessMessage(null), 3000);
-                  } else {
-                    setError("Sync failed: " + result.error);
-                  }
-                } catch (e) {
-                  setError("Sync failed.");
-                } finally {
-                  setSaving(false);
-                }
-              }}
-              disabled={saving}
-              className={`${styles.btnReset} bg-indigo-600 text-white hover:bg-indigo-700 ml-2`}
-              title="Sync changes to OrgChart view"
-            >
-              <ArrowPathIcon className={`w-4 h-4 ${saving ? 'animate-spin' : ''}`} />
-              Sync OrgChart
-            </button>
-          )}
+
 
           {showApprovalOnly && totalRecords > 0 && (
             <>
@@ -930,8 +879,8 @@ const SheetManager = ({
                 onClick={handleConfirmAction}
                 disabled={saving}
                 className={`px-4 py-2 text-white rounded-lg transition-colors flex items-center gap-2 ${confirmModal.type === 'approve'
-                    ? 'bg-green-600 hover:bg-green-700'
-                    : 'bg-orange-600 hover:bg-orange-700'
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-orange-600 hover:bg-orange-700'
                   }`}
               >
                 {saving && <ArrowPathIcon className="w-4 h-4 animate-spin" />}
