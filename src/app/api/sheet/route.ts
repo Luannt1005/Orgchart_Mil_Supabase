@@ -271,6 +271,8 @@ export async function POST(req: Request) {
 
     if (action === "bulkAddHeadcount") {
       const { quantity, data } = body;
+      console.log(`[bulkAddHeadcount] Received data for ${quantity} positions:`, JSON.stringify(data));
+
 
       if (!quantity || typeof quantity !== 'number' || quantity <= 0) {
         return NextResponse.json(

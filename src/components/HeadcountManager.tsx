@@ -42,6 +42,7 @@ const VISIBLE_COLUMNS = [
     "FullName ",
     "Status",
     "Location",
+    "DL/IDL/Staff",
 ];
 
 // Columns for the "Add Headcount" form
@@ -275,12 +276,12 @@ const HeadcountManager = () => {
                 let value = formData[key] || "";
                 if (DATE_COLUMNS.includes(key) && value) {
                     if (/\d{4}-\d{2}-\d{2}/.test(value)) {
-                        dataToSave[normalizeFieldName(key)] = new Date(value).toISOString();
+                        dataToSave[key] = new Date(value).toISOString();
                     } else {
-                        dataToSave[normalizeFieldName(key)] = value;
+                        dataToSave[key] = value;
                     }
                 } else {
-                    dataToSave[normalizeFieldName(key)] = value;
+                    dataToSave[key] = value;
                 }
             });
 
@@ -324,12 +325,12 @@ const HeadcountManager = () => {
                 let value = formData[key] || "";
                 if (DATE_COLUMNS.includes(key) && value) {
                     if (/\d{4}-\d{2}-\d{2}/.test(value)) {
-                        dataToSave[normalizeFieldName(key)] = new Date(value).toISOString();
+                        dataToSave[key] = new Date(value).toISOString();
                     } else {
-                        dataToSave[normalizeFieldName(key)] = value;
+                        dataToSave[key] = value;
                     }
                 } else {
-                    dataToSave[normalizeFieldName(key)] = value;
+                    dataToSave[key] = value;
                 }
             });
 
@@ -430,7 +431,7 @@ const HeadcountManager = () => {
                     if (DATE_COLUMNS.includes(header)) {
                         value = formatDateToISO(value);
                     }
-                    dataToSave[normalizeFieldName(header)] = value;
+                    dataToSave[header] = value;
                 });
 
                 const response = await fetch("/api/sheet", {
