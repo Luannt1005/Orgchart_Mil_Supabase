@@ -25,14 +25,20 @@ export default function PageTransition({ children }: PageTransitionProps) {
         return () => clearTimeout(timeout);
     }, [pathname, children]);
 
+    // Don't apply transition wrapper for auth pages so they can be full screen fixed
+    if (pathname === '/login' || pathname === '/signup') {
+        return <>{children}</>;
+    }
+
     return (
         <div
             className={`transition-all duration-300 ease-out ${isLoading
-                    ? 'opacity-0 translate-y-2'
-                    : 'opacity-100 translate-y-0'
+                ? 'opacity-0 translate-y-2'
+                : 'opacity-100 translate-y-0'
                 }`}
         >
             {displayChildren}
         </div>
     );
 }
+

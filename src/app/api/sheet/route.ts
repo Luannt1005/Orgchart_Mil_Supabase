@@ -94,8 +94,8 @@ export async function GET(req: Request) {
       Object.entries(filters).forEach(([key, value]) => {
         const dbColumn = FILTER_MAPPING[key];
         if (dbColumn) {
-          // Use exact match for status columns, ilike for text search
-          if (dbColumn === 'line_manager_status') {
+          // Use exact match for status columns and enum-like fields, ilike for text search
+          if (dbColumn === 'line_manager_status' || dbColumn === 'dl_idl_staff') {
             countQuery = countQuery.eq(dbColumn, value);
           } else {
             countQuery = countQuery.ilike(dbColumn, `%${value}%`);
@@ -120,8 +120,8 @@ export async function GET(req: Request) {
       Object.entries(filters).forEach(([key, value]) => {
         const dbColumn = FILTER_MAPPING[key];
         if (dbColumn) {
-          // Use exact match for status columns, ilike for text search
-          if (dbColumn === 'line_manager_status') {
+          // Use exact match for status columns and enum-like fields, ilike for text search
+          if (dbColumn === 'line_manager_status' || dbColumn === 'dl_idl_staff') {
             dataQuery = dataQuery.eq(dbColumn, value);
           } else {
             dataQuery = dataQuery.ilike(dbColumn, `%${value}%`);

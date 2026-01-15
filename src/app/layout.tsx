@@ -20,7 +20,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "OrgChart TTI SHTP",
   description: "Organization Chart Management System",
+  icons: {
+    icon: "/Milwaukee-logo-red.png",
+    shortcut: "/Milwaukee-logo-red.png",
+    apple: "/Milwaukee-logo-red.png",
+  },
 };
+
 
 export default function RootLayout({
   children,
