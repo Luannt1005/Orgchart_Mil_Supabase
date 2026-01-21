@@ -19,6 +19,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -32,7 +33,7 @@
   background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
   padding: 50px 60px;
   border-radius: 16px;
-  box-shadow: 
+  box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.25),
     0 0 1px rgba(0, 0, 0, 0.1);
   max-width: 420px;
@@ -44,6 +45,7 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -89,6 +91,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -98,15 +101,19 @@
   0% {
     transform: rotate(360deg);
   }
+
   100% {
     transform: rotate(0deg);
   }
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
@@ -128,6 +135,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -141,7 +149,7 @@
   background: linear-gradient(90deg, #f0f0f0 0%, #e8e8e8 100%);
   border-radius: 3px;
   overflow: hidden;
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.08),
     inset 0 1px 2px rgba(0, 0, 0, 0.05);
   animation: fadeInBar 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
@@ -152,6 +160,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -159,13 +168,11 @@
 
 .loading-bar-fill {
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    #bd011c 0%,
-    #ff4444 40%,
-    #ff6b6b 60%,
-    #bd011c 100%
-  );
+  background: linear-gradient(90deg,
+      #bd011c 0%,
+      #ff4444 40%,
+      #ff6b6b 60%,
+      #bd011c 100%);
   background-size: 200% 100%;
   animation: slideBar 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   border-radius: 3px;
@@ -177,10 +184,12 @@
     width: 0%;
     background-position: 0% center;
   }
+
   50% {
     width: 100%;
     background-position: 100% center;
   }
+
   100% {
     width: 0%;
     background-position: 200% center;

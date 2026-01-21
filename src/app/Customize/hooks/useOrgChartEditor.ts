@@ -49,6 +49,73 @@ export function useOrgChartEditor(
         return true;
     }, []);
 
+    /* ================= CHART ACTIONS ================= */
+    const addDepartment = useCallback((pid: string | null = null) => {
+        const chart = chartInstance.current;
+        if (!chart) return;
+        const newId = `dept_${Date.now()}`;
+        const data = {
+            id: newId,
+            pid: pid, // Parent ID (null for root)
+            stpid: null,
+            name: "New Department",
+            title: "Department",
+            image: null,
+            tags: ["group"],
+            orig_pid: pid,
+            dept: null,
+            BU: null,
+            type: "group",
+            location: null,
+            description: "",
+            joiningDate: ""
+        };
+        chart.addNode(data);
+        setHasChanges(true); // Ensure change tracking
+    }, []);
+
+    const addEmployee = useCallback((pid: string | null = null) => {
+        const chart = chartInstance.current;
+        if (!chart) return;
+        const newId = `emp_${Date.now()}`;
+        const data = {
+            id: newId,
+            pid: pid, // Parent ID (null for root)
+            stpid: null,
+            name: "New Employee",
+            title: "Position",
+            image: "",
+            tags: [],
+            orig_pid: pid,
+            dept: null,
+            BU: null,
+            description: "",
+        };
+        chart.addNode(data);
+        setHasChanges(true);
+    }, []);
+
+    const removeNode = useCallback((nodeId: string) => {
+        const chart = chartInstance.current;
+        if (!chart) return;
+        try {
+            if (typeof chart.remove === 'function') {
+                chart.remove(nodeId);
+                // Force update filter UI if present, usually redundant for basic remove
+                if (chart.filterUI && typeof chart.filterUI.update === 'function') {
+                    chart.filterUI.update();
+                }
+                chart.draw(OrgChart.action.update); // Redraw
+                setHasChanges(true);
+            } else {
+                chart.removeNode(nodeId);
+                setHasChanges(true);
+            }
+        } catch (error) {
+            console.error("Error removing node:", error);
+        }
+    }, []);
+
     /* ================= LOAD CHART DATA ================= */
     const loadChartData = useCallback(async (selectedOrgId: string) => {
         if (!selectedOrgId) return;
@@ -105,69 +172,7 @@ export function useOrgChartEditor(
 
             patchOrgChartTemplates();
 
-            // --- Define Chart Actions ---
-            const addDepartment = (nodeId: string) => {
-                const chart = chartInstance.current;
-                if (!chart) return;
-                const newId = `dept_${Date.now()}`;
-                const data = {
-                    id: newId,
-                    pid: nodeId,
-                    stpid: null,
-                    name: "New Department",
-                    title: "Department",
-                    image: null,
-                    tags: ["group"],
-                    orig_pid: nodeId,
-                    dept: null,
-                    BU: null,
-                    type: "group",
-                    location: null,
-                    description: "",
-                    joiningDate: ""
-                };
-                chart.addNode(data);
-            };
-
-            const addEmployee = (nodeId: string) => {
-                const chart = chartInstance.current;
-                if (!chart) return;
-                const newId = `emp_${Date.now()}`;
-                const data = {
-                    id: newId,
-                    pid: nodeId,
-                    stpid: null,
-                    name: "New Employee",
-                    title: "Position",
-                    image: "",
-                    tags: [],
-                    orig_pid: nodeId,
-                    dept: null,
-                    BU: null,
-                    description: "",
-                };
-                chart.addNode(data);
-            };
-
-            const removeNode = (nodeId: string) => {
-                const chart = chartInstance.current;
-                if (!chart) return;
-                try {
-                    if (typeof chart.remove === 'function') {
-                        chart.remove(nodeId);
-                        if (chart.filterUI && typeof chart.filterUI.update === 'function') {
-                            chart.filterUI.update();
-                        }
-                        chart.draw(OrgChart.action.update);
-                        setHasChanges(true);
-                    } else {
-                        chart.removeNode(nodeId);
-                    }
-                } catch (error) {
-                    console.error("Error removing node:", error);
-                }
-            };
-
+            // Old location of chart actions - now moved outside
             // --- Initialize Chart ---
             chartInstance.current = new OrgChart(chartContainerRef.current, {
                 template: "big",
@@ -348,7 +353,9 @@ export function useOrgChartEditor(
     return {
         loadChartData,
         saveChart,
-        updateNodeData, // Expose this helper
+        updateNodeData,
+        addDepartment, // Expose
+        addEmployee,   // Expose
         loadingChart,
         isSaving,
         lastSaveTime,

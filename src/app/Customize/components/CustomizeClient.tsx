@@ -56,6 +56,8 @@ const CustomizeClient = () => {
         loadChartData,
         saveChart,
         updateNodeData,
+        addDepartment, // Get from hook
+        addEmployee,   // Get from hook
         loadingChart,
         isSaving,
         lastSaveTime,
@@ -161,6 +163,8 @@ const CustomizeClient = () => {
                 onOpenCreateModal={() => setShowCreateModal(true)}
                 onSave={saveChart}
                 isSaving={isSaving}
+                onAddDepartment={() => addDepartment && addDepartment(null)}
+                onAddEmployee={() => addEmployee && addEmployee(null)}
             />
 
             {/* ===== MAIN CONTENT ===== */}

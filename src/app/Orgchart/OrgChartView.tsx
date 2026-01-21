@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useMemo, useCallback } from "react";
+import { useEffect, useRef, useMemo, useCallback, useState } from "react";
 import OrgChart from "@/lib/orgchart";
 import { patchOrgChartTemplates } from "./OrgChartTemplates";
 import LoadingScreen from "@/components/loading-screen";
 import { useFilteredOrgData } from "@/hooks/useOrgData";
 import styles from "./OrgChart.module.css";
+import NodeDetailsModal from "./NodeDetailsModal";
 
 interface OrgChartProps {
   selectedGroup?: string;
@@ -32,6 +33,8 @@ interface OrgChartNode {
 export default function OrgChartView({ selectedGroup, selectedType }: OrgChartProps) {
   const treeRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<any>(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedNodeData, setSelectedNodeData] = useState<any>(null);
 
   // Use SWR cached data with client-side filtering
   // selectedGroup === "all" means show all data, otherwise filter by group
@@ -134,7 +137,7 @@ export default function OrgChartView({ selectedGroup, selectedType }: OrgChartPr
       type: item.type || "",
       location: item.location || null,
       description: item.description || "",
-      joiningDate: item.joiningDate || ""
+      joiningDate: item.joiningDate || item.joining_date || ""
     } as OrgChartNode));
   }, [rawNodes, selectedType]);
 
@@ -252,31 +255,13 @@ export default function OrgChartView({ selectedGroup, selectedType }: OrgChartPr
         field_1: "title",
         img_0: "img",
       },
-      // nodeMenu: {
-      //   addDepartment: {
-      //     text: "Add new department",
-      //     icon: OrgChart.icon.add(24, 24, "#7A7A7A"),
-      //     onClick: addDepartment,
-      //   },
-      //   // edit: { text: "Edit" },
-      //   details: { text: "Details" },
-      //   // add: { text: "Add" },
-      //   // remove: { text: "Remove" },
-      // },
+      nodeMouseClick: OrgChart.action.none, // Disable default edit behavior
       editForm: {
         readOnly: true,
         generateElementsFromFields: false,
-        elements: [
-          { type: "textbox", label: "Name", binding: "name" },
-          { type: "textbox", label: "Title", binding: "title" },
-          { type: "textbox", label: "Department", binding: "dept" },
-          { type: "textbox", label: "Business Unit", binding: "BU" },
-          { type: "textbox", label: "Location", binding: "location" },
-          // { type: "textbox", label: "Description", binding: "description" },
-          { type: "date", label: "Joining Date", binding: "joiningDate" }
-        ],
+        elements: [],
         buttons: {
-          edit: null, // Disable edit button
+          edit: null,
           share: null,
           pdf: null,
           remove: null,
@@ -296,6 +281,15 @@ export default function OrgChartView({ selectedGroup, selectedType }: OrgChartPr
           template: "big_hc_open",
         },
       },
+    });
+
+    // Custom click handler
+    chart.on("click", (sender, args) => {
+      if (!args || !args.node) return false;
+      const node = sender.get(args.node.id);
+      setSelectedNodeData(node);
+      setDetailsModalOpen(true);
+      return false; // Prevent default
     });
 
     // Handle node update event
@@ -451,11 +445,18 @@ export default function OrgChartView({ selectedGroup, selectedType }: OrgChartPr
   }
 
   return (
-    <div
-      id="tree"
-      ref={treeRef}
-      className={styles.treeContainer}
-    />
+    <>
+      <div
+        id="tree"
+        ref={treeRef}
+        className={styles.treeContainer}
+      />
+      <NodeDetailsModal
+        isOpen={detailsModalOpen}
+        onClose={() => setDetailsModalOpen(false)}
+        nodeData={selectedNodeData}
+      />
+    </>
   );
 }
 

@@ -1,6 +1,5 @@
-'use client';
-
-import React from 'react';
+import { Menu, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
 
 interface CustomizeHeaderProps {
     orgList: any[];
@@ -13,6 +12,8 @@ interface CustomizeHeaderProps {
     onDelete: () => void;
     onOpenCreateModal: () => void;
     onSave: () => void;
+    onAddDepartment?: () => void; // New
+    onAddEmployee?: () => void;   // New
     isSaving: boolean;
 }
 
@@ -27,6 +28,8 @@ export default function CustomizeHeader({
     onDelete,
     onOpenCreateModal,
     onSave,
+    onAddDepartment,
+    onAddEmployee,
     isSaving
 }: CustomizeHeaderProps) {
     return (
@@ -69,7 +72,7 @@ export default function CustomizeHeader({
                     )}
                 </div>
 
-                {/* Action Buttons */}
+                {/* RELOAD */}
                 <button
                     onClick={onReload}
                     disabled={loadingChart || !orgId}
@@ -81,6 +84,63 @@ export default function CustomizeHeader({
                     </svg>
                 </button>
 
+                {/* ADD ACTIONS MENU */}
+                <Menu as="div" className="relative inline-block text-left">
+                    <Menu.Button
+                        disabled={!orgId || loadingChart}
+                        className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <svg className="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Node
+                        <svg className="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </Menu.Button>
+                    <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-100"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                    >
+                        <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                            <div className="p-1">
+                                <Menu.Item>
+                                    {({ active }) => (
+                                        <button
+                                            onClick={onAddDepartment}
+                                            className={`${active ? 'bg-indigo-50 text-indigo-600' : 'text-gray-900'
+                                                } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                                        >
+                                            <span className="mr-2">🏢</span>
+                                            Add Department
+                                        </button>
+                                    )}
+                                </Menu.Item>
+                                <Menu.Item>
+                                    {({ active }) => (
+                                        <button
+                                            onClick={onAddEmployee}
+                                            className={`${active ? 'bg-indigo-50 text-indigo-600' : 'text-gray-900'
+                                                } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                                        >
+                                            <span className="mr-2">👤</span>
+                                            Add Employee
+                                        </button>
+                                    )}
+                                </Menu.Item>
+                            </div>
+                        </Menu.Items>
+                    </Transition>
+                </Menu>
+
+                <div className="h-8 w-px bg-slate-200 mx-1"></div>
+
+                {/* DELETE */}
                 <button
                     onClick={onDelete}
                     disabled={!orgId}
@@ -92,8 +152,7 @@ export default function CustomizeHeader({
                     </svg>
                 </button>
 
-                <div className="h-8 w-px bg-slate-200 mx-1"></div>
-
+                {/* NEW PROFILE */}
                 <button
                     onClick={onOpenCreateModal}
                     className="flex h-9 items-center gap-2 rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-all active:scale-95"
@@ -101,9 +160,10 @@ export default function CustomizeHeader({
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    New Profile
+                    New
                 </button>
 
+                {/* SAVE */}
                 <button
                     onClick={onSave}
                     disabled={isSaving || !orgId || !hasChanges}
@@ -117,7 +177,7 @@ export default function CustomizeHeader({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                         </svg>
                     )}
-                    Save Changes
+                    Save
                 </button>
             </div>
         </header>
