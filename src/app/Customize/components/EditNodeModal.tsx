@@ -22,6 +22,8 @@ export default function EditNodeModal({
         if (nodeData) {
             setFormData({
                 id: nodeData.id || '',
+                pid: nodeData.pid || null,
+                stpid: nodeData.stpid || null,
                 name: nodeData.name || '',
                 title: nodeData.title || '',
                 img: nodeData.img || nodeData.photo || nodeData.image || '',
@@ -47,6 +49,8 @@ export default function EditNodeModal({
                     title: employee.title || prev.title,
                     img: employee.img || employee.photo || employee.image || prev.img,
                     dept: employee.dept || prev.dept
+                    // IMPORTANT: Do NOT update pid or stpid here. 
+                    // We want to keep the current parenting structure even if the node identity changes.
                 }));
             }
         }
