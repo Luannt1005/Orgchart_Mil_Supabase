@@ -356,6 +356,7 @@ export function useOrgChartEditor(
         updateNodeData,
         addDepartment, // Expose
         addEmployee,   // Expose
+        removeNode,    // Expose
         loadingChart,
         isSaving,
         lastSaveTime,

@@ -58,6 +58,7 @@ const CustomizeClient = () => {
         updateNodeData,
         addDepartment, // Get from hook
         addEmployee,   // Get from hook
+        removeNode,    // Get from hook
         loadingChart,
         isSaving,
         lastSaveTime,
@@ -212,6 +213,10 @@ const CustomizeClient = () => {
                 isOpen={editModalOpen}
                 onClose={() => setEditModalOpen(false)}
                 onSave={handleSaveNode}
+                onDelete={(nodeId) => {
+                    removeNode(nodeId);
+                    setEditModalOpen(false);
+                }}
                 nodeData={selectedNodeDataForEdit}
                 allNodes={allNodes}
             />

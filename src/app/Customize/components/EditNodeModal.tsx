@@ -5,6 +5,7 @@ interface EditNodeModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (nodeId: string, data: any) => void;
+    onDelete?: (nodeId: string) => void;
     nodeData: any | null;
     allNodes: any[]; // For auto-mapping
 }
@@ -13,6 +14,7 @@ export default function EditNodeModal({
     isOpen,
     onClose,
     onSave,
+    onDelete,
     nodeData,
     allNodes
 }: EditNodeModalProps) {
@@ -76,6 +78,16 @@ export default function EditNodeModal({
         onClose();
     };
 
+    const handleDelete = () => {
+        if (confirm("Are you sure you want to delete this node?")) {
+            if (onDelete && nodeData?.id) {
+                onDelete(nodeData.id);
+            }
+        }
+    };
+
+    const isDepartment = formData.tags?.toString().toLowerCase().includes('group');
+
     return (
         <Transition appear show={isOpen} as={Fragment}>
             <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -102,104 +114,109 @@ export default function EditNodeModal({
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-slate-800 p-6 text-left align-middle shadow-xl transition-all">
                                 <Dialog.Title
                                     as="h3"
-                                    className="text-lg font-medium leading-6 text-gray-900 mb-4"
+                                    className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4"
                                 >
                                     Edit Node Details
                                 </Dialog.Title>
 
                                 <div className="space-y-4">
                                     {/* ID Field */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Employee ID / Node ID</label>
-                                        <input
-                                            type="text"
-                                            name="id"
-                                            value={formData.id || ''}
-                                            onChange={handleChange}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-                                        />
-                                    </div>
+                                    {!isDepartment && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Employee ID / Node ID</label>
+                                            <input
+                                                type="text"
+                                                name="id"
+                                                value={formData.id || ''}
+                                                onChange={handleChange}
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-700 dark:text-white sm:text-sm border p-2"
+                                            />
+                                        </div>
+                                    )}
 
                                     {/* Name Field */}
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Name</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Name</label>
                                         <input
                                             type="text"
                                             name="name"
                                             value={formData.name || ''}
                                             onChange={handleChange}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+                                            className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-700 dark:text-white sm:text-sm border p-2"
                                         />
                                     </div>
 
                                     {/* Title Field */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Title</label>
-                                        <input
-                                            type="text"
-                                            name="title"
-                                            value={formData.title || ''}
-                                            onChange={handleChange}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-                                        />
-                                    </div>
+                                    {!isDepartment && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Title</label>
+                                            <input
+                                                type="text"
+                                                name="title"
+                                                value={formData.title || ''}
+                                                onChange={handleChange}
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-700 dark:text-white sm:text-sm border p-2"
+                                            />
+                                        </div>
+                                    )}
 
                                     {/* Department Field */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Department</label>
-                                        <input
-                                            type="text"
-                                            name="dept"
-                                            value={formData.dept || ''}
-                                            onChange={handleChange}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-                                        />
-                                    </div>
-
-                                    {/* Image URL Field */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Photo URL</label>
-                                        <input
-                                            type="text"
-                                            name="img"
-                                            value={formData.img || ''}
-                                            onChange={handleChange}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-                                        />
-                                    </div>
+                                    {!isDepartment && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Department</label>
+                                            <input
+                                                type="text"
+                                                name="dept"
+                                                value={formData.dept || ''}
+                                                onChange={handleChange}
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-700 dark:text-white sm:text-sm border p-2"
+                                            />
+                                        </div>
+                                    )}
 
                                     {/* Description Field */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Description</label>
-                                        <textarea
-                                            name="description"
-                                            value={formData.description || ''}
-                                            onChange={handleChange}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-                                        />
-                                    </div>
+                                    {!isDepartment && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Description</label>
+                                            <textarea
+                                                name="description"
+                                                value={formData.description || ''}
+                                                onChange={handleChange}
+                                                className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-700 dark:text-white sm:text-sm border p-2"
+                                            />
+                                        </div>
+                                    )}
 
                                     {/* Tags Field */}
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Tags (comma separated)</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Tags (comma separated)</label>
                                         <input
                                             type="text"
                                             name="tags"
                                             value={formData.tags || ''}
                                             onChange={handleChange}
                                             placeholder="group, assistant, etc."
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+                                            className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-700 dark:text-white sm:text-sm border p-2"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="mt-6 flex justify-end gap-3">
+                                    {onDelete && (
+                                        <button
+                                            type="button"
+                                            className="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:visible:ring-2 focus:visible:ring-red-500 focus:visible:ring-offset-2 mr-auto"
+                                            onClick={handleDelete}
+                                        >
+                                            Delete
+                                        </button>
+                                    )}
                                     <button
                                         type="button"
-                                        className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus:visible:ring-2 focus:visible:ring-gray-500 focus:visible:ring-offset-2"
+                                        className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 dark:bg-slate-600 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-slate-500 focus:outline-none focus:visible:ring-2 focus:visible:ring-gray-500 focus:visible:ring-offset-2"
                                         onClick={onClose}
                                     >
                                         Cancel
@@ -217,6 +234,6 @@ export default function EditNodeModal({
                     </div>
                 </div>
             </Dialog>
-        </Transition>
+        </Transition >
     );
 }
