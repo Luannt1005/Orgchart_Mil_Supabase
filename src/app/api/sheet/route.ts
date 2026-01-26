@@ -313,6 +313,7 @@ export async function POST(req: Request) {
       if (error) throw error;
 
       invalidateCachePrefix('employees');
+      invalidateCachePrefix('orgchart');
 
       return NextResponse.json({
         success: true,
@@ -347,6 +348,7 @@ export async function POST(req: Request) {
       if (error) throw error;
 
       invalidateCachePrefix('employees');
+      invalidateCachePrefix('orgchart');
 
 
 
@@ -386,6 +388,7 @@ export async function POST(req: Request) {
       if (updateError) throw updateError;
 
       invalidateCachePrefix('employees');
+      invalidateCachePrefix('orgchart');
 
       console.log(`🚫 Rejected ${pendingRows.length} pending requests`);
 
@@ -430,6 +433,7 @@ export async function POST(req: Request) {
       }
 
       invalidateCachePrefix('employees');
+      invalidateCachePrefix('orgchart');
 
       // Trigger OrgChart sync after approving all
       console.log(`✅ Approved ${successCount} pending requests`);
@@ -512,6 +516,7 @@ export async function PUT(req: Request) {
     if (error) throw error;
 
     invalidateCachePrefix('employees');
+    invalidateCachePrefix('orgchart');
 
 
 
@@ -556,6 +561,7 @@ export async function DELETE(req: Request) {
       if (deleteError) throw deleteError;
 
       invalidateCachePrefix('employees');
+      invalidateCachePrefix('orgchart');
 
       console.log(`🗑️ Deleted ALL ${count} employees`);
 
@@ -582,6 +588,7 @@ export async function DELETE(req: Request) {
     if (error) throw error;
 
     invalidateCachePrefix('employees');
+    invalidateCachePrefix('orgchart');
 
     return NextResponse.json({
       success: true,

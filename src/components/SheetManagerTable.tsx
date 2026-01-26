@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo, startTransition } from "react";
+import { useEffect, useState, useCallback, useMemo, startTransition, useRef } from "react";
 import {
   PlusIcon,
   ArrowPathIcon,
@@ -98,6 +98,17 @@ const isLineManagerCol = (header: string) => {
 const formatDate = (value: any): string => {
   if (!value) return "";
   try {
+    // Handle Excel serial number (integers)
+    if (typeof value === 'number' || (typeof value === 'string' && /^\d+$/.test(value))) {
+      const excelSerial = Number(value);
+      if (excelSerial > 0) {
+        const date = new Date((excelSerial - 1) * 86400000 + new Date(1900, 0, 1).getTime());
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+    }
     if (typeof value === 'string' && value.includes('T')) {
       const date = new Date(value);
       const day = String(date.getDate()).padStart(2, '0');
@@ -112,6 +123,34 @@ const formatDate = (value: any): string => {
   } catch {
     return String(value);
   }
+};
+
+const IMAGE_BASE_URL = "https://jugotvbkvknjcxrgyyfq.supabase.co/storage/v1/object/public/Mil%20VN%20Images/uploads/";
+
+const getStatusColor = (value: string, type: string) => {
+  const v = String(value).toLowerCase().trim();
+
+  if (type === 'dl_idl') {
+    if (v === 'dl') return 'bg-blue-100 text-blue-700 border-blue-200';
+    if (v === 'idl') return 'bg-purple-100 text-purple-700 border-purple-200';
+    if (v === 'staff') return 'bg-amber-100 text-amber-700 border-amber-200';
+    return 'bg-gray-100 text-gray-700 border-gray-200';
+  }
+
+  if (type === 'status') {
+    if (v.includes('active')) return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+    if (v.includes('resign')) return 'bg-red-100 text-red-700 border-red-200';
+    if (v.includes('maternity')) return 'bg-pink-100 text-pink-700 border-pink-200';
+    return 'bg-gray-100 text-gray-700 border-gray-200';
+  }
+
+  if (type === 'emp_type') {
+    if (v.includes('official')) return 'bg-indigo-100 text-indigo-700 border-indigo-200';
+    if (v.includes('probation')) return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+    return 'bg-slate-100 text-slate-700 border-slate-200';
+  }
+
+  return 'bg-gray-50 text-gray-600 border-gray-100';
 };
 
 const formatDateToISO = (value: string): string => {
@@ -159,6 +198,11 @@ const SheetManager = ({
   const [saving, setSaving] = useState(false);
   const [showApprovalOnly, setShowApprovalOnly] = useState(initialShowApprovalOnly);
 
+  // Image upload state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingRowId, setUploadingRowId] = useState<string | null>(null);
+  const [imageVersion, setImageVersion] = useState<number>(Date.now());
+
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [confirmModal, setConfirmModal] = useState<{
@@ -166,6 +210,88 @@ const SheetManager = ({
     type: 'approve' | 'reject' | null;
     count: number;
   }>({ show: false, type: null, count: 0 });
+
+  // Handle Image Upload
+  const handleAvatarClick = (e: React.MouseEvent, rowId: string) => {
+    e.stopPropagation(); // Prevent cell edit
+    if (saving) return; // Prevent concurrent actions
+    setUploadingRowId(rowId);
+    fileInputRef.current?.click();
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !uploadingRowId) return;
+
+    // Find row to get Emp ID
+    const row = rows.find(r => r.id === uploadingRowId);
+    const empId = row?.["Emp ID"];
+
+    if (!empId) {
+      setError("Cannot upload image: Employee ID not found.");
+      return;
+    }
+
+    setSaving(true);
+    setSuccessMessage("Processing and uploading image...");
+
+    try {
+      // 1. Resize and Convert to WebP using Canvas
+      const imageBitmap = await createImageBitmap(file);
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) throw new Error("Canvas context failed");
+
+      // Target dimensions
+      const targetWidth = 225;
+      const targetHeight = 300;
+
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+
+      // Draw and resize (stretch to fit or crop?)
+      // Requirement says "resize to 225 x 300". Usually simple resizing.
+      // If we want maintain aspect ratio we need more logic, but "resize" implies exact match.
+      ctx.drawImage(imageBitmap, 0, 0, targetWidth, targetHeight);
+
+      // Convert to blob (webp)
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, 'image/webp', 0.9) // 0.9 quality
+      );
+
+      if (!blob) throw new Error("Image conversion failed");
+
+      // 2. Prepare Upload
+      const formData = new FormData();
+      formData.append("file", blob);
+      formData.append("filename", empId); // Name is Emp ID
+
+      // 3. Upload via API
+      const response = await fetch("/api/upload-image", {
+        method: "POST",
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setSuccessMessage("✅ Image updated successfully");
+        setImageVersion(Date.now()); // Force refresh images
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setError(result.error || "Failed to upload image");
+      }
+
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      setError("Error processing image: " + (err.message || "Unknown error"));
+    } finally {
+      setSaving(false);
+      setUploadingRowId(null);
+      if (fileInputRef.current) fileInputRef.current.value = ""; // Reset input
+    }
+  };
 
   // Debounce logic
   useEffect(() => {
@@ -754,20 +880,60 @@ const SheetManager = ({
                             className={styles.cellInput}
                           />
                         ) : (
-                          <div className={styles.cellContent}>
-                            <span>{DATE_COLUMNS.includes(header) ? formatDate(row[header]) : String(row[header] || "")}</span>
-                            {isPending && (
-                              <>
-                                <span className="text-[10px] text-amber-600 font-bold block">
-                                  → {row.pendingLineManager}
-                                </span>
-                                {row.requester && (
-                                  <span className="text-[9px] text-gray-500 italic block mt-0.5">
-                                    by {row.requester}
-                                  </span>
-                                )}
-                              </>
+                          <div className={`flex items-center gap-3 min-h-[40px] ${styles.cellContent}`}>
+                            {/* Avatar for FullName */}
+                            {header === "FullName " && (
+                              <div
+                                className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden border border-gray-200 bg-gray-50 shadow-sm relative group cursor-pointer"
+                                onClick={(e) => handleAvatarClick(e, row.id)}
+                                title="Click to change photo"
+                              >
+                                <img
+                                  src={`${IMAGE_BASE_URL}${row["Emp ID"]}.webp?v=${imageVersion}`}
+                                  alt=""
+                                  loading="lazy"
+                                  className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(row["FullName "] || "User")}&background=random&color=fff&size=64`;
+                                  }}
+                                />
+                                {/* Hover overlay icon */}
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/30 transition-opacity">
+                                  <ArrowPathIcon className="w-4 h-4 text-white" />
+                                </div>
+                              </div>
                             )}
+
+                            {/* Cell Content */}
+                            <div className="flex-grow">
+                              {(header === "DL/IDL/Staff" || header === "Employee\r\n Type" || header === "Status") ? (
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border shadow-sm ${header === "DL/IDL/Staff" ? getStatusColor(row[header], 'dl_idl') :
+                                  header === "Employee\r\n Type" ? getStatusColor(row[header], 'emp_type') :
+                                    getStatusColor(row[header], 'status')
+                                  }`}>
+                                  {String(row[header] || "")}
+                                </span>
+                              ) : (
+                                <span className={`block truncate ${header === "FullName " ? "font-medium text-gray-900" : "text-gray-700"}`}>
+                                  {DATE_COLUMNS.includes(header) ? formatDate(row[header]) : String(row[header] || "")}
+                                </span>
+                              )}
+
+                              {/* Pending Review Info */}
+                              {isPending && (
+                                <div className="mt-1 p-1 bg-amber-50 rounded border border-amber-100 inline-block">
+                                  <span className="text-[10px] text-amber-700 font-bold flex items-center gap-1">
+                                    <ArrowPathIcon className="w-3 h-3 animate-spin" />
+                                    → {row.pendingLineManager}
+                                  </span>
+                                  {row.requester && (
+                                    <span className="text-[9px] text-gray-500 italic block mt-0.5 px-0.5">
+                                      by {row.requester}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         )
                         }
@@ -922,7 +1088,15 @@ const SheetManager = ({
         onSave={handleSaveNewEmployee}
         columns={ADD_FORM_COLUMNS}
       />
-    </div >
+      {/* Hidden File Input for Image Upload */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/*"
+        onChange={handleImageUpload}
+      />
+    </div>
   );
 };
 
