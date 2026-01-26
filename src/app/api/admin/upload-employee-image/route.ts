@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
         const { data, error } = await supabaseAdmin.storage
             .from("Mil VN Images")
-            .upload(filename, buffer, {
+            .upload(`uploads/${filename}`, buffer, {
                 contentType: "image/webp",
                 upsert: true, // Replace if exists
                 cacheControl: "3600"

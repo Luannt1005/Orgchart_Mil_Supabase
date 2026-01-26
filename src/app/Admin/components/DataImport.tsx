@@ -84,16 +84,19 @@ export default function DataImport() {
 
         // Initial validation logs
         const initialLogs = newFiles.map(f => {
-            const nameWithoutExt = f.name.substring(0, f.name.lastIndexOf('.'));
-            // Regex: Starts with 1-9, followed by any digits. No leading zeros. 
-            // Also explicitly disallow known bad patterns if needed, but ^[1-9][0-9]*$ covers "no leading zero".
-            // e.g. "818" matches. "0818" does not. "612778" matches.
-            const isValidName = /^[1-9][0-9]*$/.test(nameWithoutExt);
+            // Updated Regex: Match leading digits (ID) followed by optional anything else.
+            // Example: "612778 Nguyen Van A.jpg" -> match "612778"
+            // Example: "612778.jpg" -> match "612778"
+            // No leading zeros allowed for the ID part.
+            const match = f.name.match(/^([1-9]\d*)/);
+            const isValidName = !!match;
 
             return {
                 name: f.name,
                 status: isValidName ? 'pending' as const : 'error' as const,
-                message: isValidName ? 'Ready to upload' : 'Invalid format. Name must be Employee ID (e.g., 818, 612778) without leading zeros.'
+                message: isValidName
+                    ? `Ready (ID: ${match ? match[1] : ''})`
+                    : 'Invalid format. Name must start with Employee ID (no leading zeros).'
             };
         });
 
@@ -103,10 +106,11 @@ export default function DataImport() {
 
     const processAndUploadImage = async (file: File, index: number) => {
         return new Promise<void>(async (resolve) => {
-            const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.'));
+            // Extract ID from filename again
+            const match = file.name.match(/^([1-9]\d*)/);
 
             // Re-validate just in case
-            if (!/^[1-9][0-9]*$/.test(nameWithoutExt)) {
+            if (!match) {
                 setImageLogs(prev => {
                     const newLogs = [...prev];
                     newLogs[index] = { ...newLogs[index], status: 'error', message: 'Invalid ID format' };
@@ -115,6 +119,8 @@ export default function DataImport() {
                 resolve();
                 return;
             }
+
+            const employeeId = match[1]; // e.g. "612778"
 
             try {
                 // 1. Resize and Convert to WebP
@@ -150,7 +156,7 @@ export default function DataImport() {
                 // 2. Upload to Supabase
                 // Bucket: 'employee_images'
                 // Filename: ID.webp
-                const fileName = `${nameWithoutExt}.webp`;
+                const fileName = `${employeeId}.webp`;
 
                 // 2. Upload via API (to bypass RLS)
                 const formData = new FormData();
@@ -335,14 +341,28 @@ export default function DataImport() {
 
                         {imageFiles.length === 0 ? (
                             <div
+                                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                                onDragLeave={() => setIsDragging(false)}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    setIsDragging(false);
+                                    handleImageFilesChange(e.dataTransfer.files);
+                                }}
                                 onClick={() => imageInputRef.current?.click()}
-                                className="w-full h-48 border-2 border-dashed border-gray-300 rounded-xl hover:bg-gray-50 cursor-pointer flex flex-col items-center justify-center gap-3 transition-colors"
+                                className={`
+                                    w-full h-48 border-2 border-dashed rounded-xl cursor-pointer flex flex-col items-center justify-center gap-3 transition-colors
+                                    ${isDragging
+                                        ? "border-blue-500 bg-blue-50/50"
+                                        : "border-gray-300 hover:bg-gray-50"
+                                    }
+                                `}
                             >
-                                <div className="p-3 bg-blue-50 rounded-full text-blue-600">
+                                <div className={`p-3 rounded-full ${isDragging ? "bg-blue-100 text-blue-600" : "bg-blue-50 text-blue-600"}`}>
                                     <PhotoIcon className="w-8 h-8" />
                                 </div>
                                 <p className="text-sm font-medium text-gray-900">Click to select images</p>
-                                <p className="text-xs text-gray-500">Supports JPG, PNG, WEBP</p>
+                                <p className="text-xs text-gray-500">or drag and drop here</p>
+                                <p className="text-xs text-gray-400">Supports JPG, PNG, WEBP</p>
                             </div>
                         ) : (
                             <div className="w-full flex-1 flex flex-col min-h-0 bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
