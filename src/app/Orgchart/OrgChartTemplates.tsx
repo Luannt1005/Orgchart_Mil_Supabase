@@ -2,8 +2,36 @@
 
 import OrgChart from "@/lib/orgchart";
 
-export function patchOrgChartTemplates() {
+export function patchOrgChartTemplates(enableEditFeatures = false) {
   if (typeof window === "undefined") return;
+
+  // Constants for Move Buttons
+  const MOVE_BUTTONS_SVG = `
+    <!-- Move Left Button -->
+    <g style="cursor:pointer;" data-move-btn="left" transform="translate(10, 345)">
+        <circle cx="12" cy="12" r="12" fill="transparent" stroke="none" />
+        <path d="M14 8 L8 12 L14 16" stroke="#6b7280" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- Move Right Button -->
+    <g style="cursor:pointer;" data-move-btn="right" transform="translate(40, 345)">
+        <circle cx="12" cy="12" r="12" fill="transparent" stroke="none" />
+        <path d="M10 8 L16 12 L10 16" stroke="#6b7280" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  `;
+
+  const GROUP_MOVE_BUTTONS_SVG = `
+    <!-- Move Left Button -->
+    <g style="cursor:pointer;" data-move-btn="left" transform="translate(10, 20)">
+        <circle cx="12" cy="12" r="12" fill="transparent" stroke="none" />
+        <path d="M14 8 L8 12 L14 16" stroke="#6b7280" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <!-- Move Right Button -->
+    <g style="cursor:pointer;" data-move-btn="right" transform="translate(40, 20)">
+        <circle cx="12" cy="12" r="12" fill="transparent" stroke="none" />
+        <path d="M10 8 L16 12 L10 16" stroke="#6b7280" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  `;
 
   // --- TEMPLATE BIG (Milwaukee Industrial Edition) ---
   OrgChart.templates.big = Object.assign({}, OrgChart.templates.ana);
@@ -42,6 +70,10 @@ export function patchOrgChartTemplates() {
       fill="#DB011C"
       rx="0" ry="0"></rect>
 `;
+
+  if (enableEditFeatures) {
+    OrgChart.templates.big.node += MOVE_BUTTONS_SVG;
+  }
 
   // ------------------------------
   // Image
@@ -121,6 +153,16 @@ export function patchOrgChartTemplates() {
   // ------------------------------
   OrgChart.templates.big.up = "";
 
+  // Custom Menu Button (3 dots) - Gray Color
+  OrgChart.templates.big.nodeMenuButton = `
+    <g style="cursor:pointer;" transform="matrix(1,0,0,1,200,345)" data-ctrl-menu="">
+      <circle cx="12" cy="12" r="12" fill="transparent" />
+      <circle cx="6" cy="12" r="2" fill="#6b7280" />
+      <circle cx="12" cy="12" r="2" fill="#6b7280" />
+      <circle cx="18" cy="12" r="2" fill="#6b7280" />
+    </g>
+  `;
+
 
 
 
@@ -136,7 +178,12 @@ export function patchOrgChartTemplates() {
 
   OrgChart.templates.group.node =
     '<rect x="0" y="0" height="60" width="{w}" rx="0" ry="0" fill="#828282" stroke="#000" stroke-width="4" filter="url(#mil-shadow)"></rect>' +
+    '<rect x="0" y="0" height="60" width="{w}" rx="0" ry="0" fill="#828282" stroke="#000" stroke-width="4" filter="url(#mil-shadow)"></rect>' +
     '<rect x="0" y="0" height="8" width="{w}" fill="#DB011C"></rect>';
+
+  if (enableEditFeatures) {
+    OrgChart.templates.group.node += GROUP_MOVE_BUTTONS_SVG;
+  }
 
   OrgChart.templates.group.field_0 =
     '<text data-width="480" style="font-size: 23px; font-weight: 1000; text-transform: uppercase;" fill="#000" x="{cw}" y="42" text-anchor="middle">{val}</text>';
@@ -144,10 +191,15 @@ export function patchOrgChartTemplates() {
   OrgChart.templates.group.link =
     '<path stroke-linejoin="round" stroke="#000" stroke-width="2px" fill="none" d="M{xa},{ya} {xb},{yb} {xc},{yc} L{xd},{yd}" />';
 
-  OrgChart.templates.group.nodeMenuButton = '';
+  OrgChart.templates.group.nodeMenuButton = "";
   OrgChart.templates.group.up = '';
   OrgChart.templates.group.plus = '';
   OrgChart.templates.group.minus = '';
+
+
+
+
+
 
 
 
@@ -170,6 +222,10 @@ export function patchOrgChartTemplates() {
       rx="0" ry="0"></rect>
 `;
 
+  if (enableEditFeatures) {
+    OrgChart.templates.big_v2.node += MOVE_BUTTONS_SVG;
+  }
+
 
 
 
@@ -191,6 +247,10 @@ export function patchOrgChartTemplates() {
       rx="0" ry="0"></rect>
 `;
 
+  if (enableEditFeatures) {
+    OrgChart.templates.big_hc_open.node += MOVE_BUTTONS_SVG;
+  }
+
 
 
   // --- TEMPLATE BIG Inderct report group (Milwaukee Industrial Edition) ---
@@ -198,8 +258,12 @@ export function patchOrgChartTemplates() {
 
   OrgChart.templates.indirect_group.node =
     '<rect x="0" y="0" height="60" width="{w}" rx="0" ry="0" fill="#828282" stroke="#1e90ff" stroke-width="4" stroke-dasharray="10" filter="url(#mil-shadow)"></rect>' +
+    '<rect x="0" y="0" height="60" width="{w}" rx="0" ry="0" fill="#828282" stroke="#1e90ff" stroke-width="4" stroke-dasharray="10" filter="url(#mil-shadow)"></rect>' +
     '<rect x="0" y="0" height="8" width="{w}" fill="#DB011C"></rect>';
 
+  if (enableEditFeatures) {
+    OrgChart.templates.indirect_group.node += GROUP_MOVE_BUTTONS_SVG;
+  }
 
   OrgChart.templates.indirect_group.link =
     '<path stroke-linejoin="round" stroke="#1e90ff" stroke-width="4px" stroke-dasharray="10" fill="none" d="M{xa},{ya} {xb},{yb} {xc},{yc} L{xd},{yd}" />';

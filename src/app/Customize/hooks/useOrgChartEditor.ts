@@ -116,6 +116,48 @@ export function useOrgChartEditor(
         }
     }, []);
 
+    /* ================= MOVE NODE ================= */
+    const moveNode = useCallback((nodeId: string, direction: 'left' | 'right') => {
+        const chart = chartInstance.current;
+        if (!chart) return;
+
+        const nodes = chart.config.nodes as any[];
+        const nodeIndex = nodes.findIndex(n => n.id === nodeId);
+        if (nodeIndex === -1) return;
+
+        const node = nodes[nodeIndex];
+        const pid = node.pid;
+        const stpid = node.stpid;
+
+        // Find siblings (nodes with same pid and stpid)
+        const siblings = nodes.filter(n => n.pid == pid && n.stpid == stpid);
+
+        // Find index of current node within siblings
+        const siblingIndex = siblings.findIndex(n => n.id === nodeId);
+        if (siblingIndex === -1) return;
+
+        // Calculate target index
+        const targetSiblingIndex = direction === 'left' ? siblingIndex - 1 : siblingIndex + 1;
+
+        // Check bounds
+        if (targetSiblingIndex < 0 || targetSiblingIndex >= siblings.length) return;
+
+        const targetSibling = siblings[targetSiblingIndex];
+        const targetNodeIndex = nodes.findIndex(n => n.id === targetSibling.id);
+
+        if (targetNodeIndex === -1) return;
+
+        // Swap in the main array
+        const temp = nodes[nodeIndex];
+        nodes[nodeIndex] = nodes[targetNodeIndex];
+        nodes[targetNodeIndex] = temp;
+
+        // Update chart display preserving state
+        // OrgChart.action.update tells the chart to refresh changes without full reset
+        chart.draw(OrgChart.action.update);
+        setHasChanges(true);
+    }, []);
+
     /* ================= LOAD CHART DATA ================= */
     const loadChartData = useCallback(async (selectedOrgId: string) => {
         if (!selectedOrgId) return;
@@ -170,13 +212,14 @@ export function useOrgChartEditor(
 
             if (!chartContainerRef.current) return;
 
-            patchOrgChartTemplates();
+            patchOrgChartTemplates(true);
 
             // Old location of chart actions - now moved outside
             // --- Initialize Chart ---
             chartInstance.current = new OrgChart(chartContainerRef.current, {
                 template: "big",
                 enableDragDrop: true,
+                enableSearch: false,
                 nodeBinding: {
                     field_0: "name",
                     field_1: "title",
@@ -214,7 +257,18 @@ export function useOrgChartEditor(
             // --- Bind Events ---
 
             // Custom Click Handler
+            // Custom Click Handler
             chartInstance.current.on('click', (sender: any, args: any) => {
+                const event = args.event;
+                // Check if clicked ON a move button
+                const moveBtn = event.target.closest('[data-move-btn]');
+                if (moveBtn) {
+                    const direction = moveBtn.getAttribute('data-move-btn');
+                    const nodeId = args.node.id;
+                    moveNode(nodeId, direction);
+                    return false; // Prevent default node click
+                }
+
                 const nodeId = args.node.id;
                 const nodeData = sender.get(nodeId);
                 if (onNodeClick && nodeData) {
@@ -264,46 +318,9 @@ export function useOrgChartEditor(
     }, [onChartNotFound, chartContainerRef, allNodes]);
 
 
-    /* ================= MOVE NODE ================= */
-    const moveNode = useCallback((nodeId: string, direction: 'left' | 'right') => {
-        const chart = chartInstance.current;
-        if (!chart) return;
 
-        const nodes = chart.config.nodes as any[];
-        const nodeIndex = nodes.findIndex(n => n.id === nodeId);
-        if (nodeIndex === -1) return;
 
-        const node = nodes[nodeIndex];
-        const pid = node.pid;
-        const stpid = node.stpid;
 
-        // Find siblings (nodes with same pid and stpid)
-        const siblings = nodes.filter(n => n.pid == pid && n.stpid == stpid);
-
-        // Find index of current node within siblings
-        const siblingIndex = siblings.findIndex(n => n.id === nodeId);
-        if (siblingIndex === -1) return;
-
-        // Calculate target index
-        const targetSiblingIndex = direction === 'left' ? siblingIndex - 1 : siblingIndex + 1;
-
-        // Check bounds
-        if (targetSiblingIndex < 0 || targetSiblingIndex >= siblings.length) return;
-
-        const targetSibling = siblings[targetSiblingIndex];
-        const targetNodeIndex = nodes.findIndex(n => n.id === targetSibling.id);
-
-        if (targetNodeIndex === -1) return;
-
-        // Swap in the main array
-        const temp = nodes[nodeIndex];
-        nodes[nodeIndex] = nodes[targetNodeIndex];
-        nodes[targetNodeIndex] = temp;
-
-        // Reload chart with new order
-        chart.load(nodes);
-        setHasChanges(true);
-    }, []);
 
     /* ================= SAVE CHANGES ================= */
     const saveChart = async () => {

@@ -6,7 +6,6 @@ interface EditNodeModalProps {
     onClose: () => void;
     onSave: (nodeId: string, data: any) => void;
     onDelete?: (nodeId: string) => void;
-    onMove?: (nodeId: string, direction: 'left' | 'right') => void;
     nodeData: any | null;
     allNodes: any[]; // For auto-mapping
 }
@@ -16,7 +15,7 @@ export default function EditNodeModal({
     onClose,
     onSave,
     onDelete,
-    onMove,
+
     nodeData,
     allNodes
 }: EditNodeModalProps) {
@@ -217,27 +216,7 @@ export default function EditNodeModal({
                                         </button>
                                     )}
 
-                                    {/* Move Buttons */}
-                                    {onMove && (
-                                        <div className="flex gap-2 mr-auto ml-2">
-                                            <button
-                                                type="button"
-                                                className="inline-flex justify-center rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                                                onClick={() => nodeData?.id && onMove(nodeData.id, 'left')}
-                                                title="Move Left"
-                                            >
-                                                &larr;
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="inline-flex justify-center rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm font-medium text-gray-700 dark:text-white shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                                                onClick={() => nodeData?.id && onMove(nodeData.id, 'right')}
-                                                title="Move Right"
-                                            >
-                                                &rarr;
-                                            </button>
-                                        </div>
-                                    )}
+
                                     <button
                                         type="button"
                                         className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 dark:bg-slate-600 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-slate-500 focus:outline-none focus:visible:ring-2 focus:visible:ring-gray-500 focus:visible:ring-offset-2"

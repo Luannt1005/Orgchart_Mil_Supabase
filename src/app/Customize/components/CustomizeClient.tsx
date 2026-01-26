@@ -59,7 +59,7 @@ const CustomizeClient = () => {
         addDepartment, // Get from hook
         addEmployee,   // Get from hook
         removeNode,    // Get from hook
-        moveNode,      // Get from hook
+
         loadingChart,
         isSaving,
         lastSaveTime,
@@ -218,7 +218,6 @@ const CustomizeClient = () => {
                     removeNode(nodeId);
                     setEditModalOpen(false);
                 }}
-                onMove={moveNode}
                 nodeData={selectedNodeDataForEdit}
                 allNodes={allNodes}
             />
