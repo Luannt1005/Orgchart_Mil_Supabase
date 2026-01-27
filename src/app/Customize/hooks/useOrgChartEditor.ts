@@ -95,6 +95,27 @@ export function useOrgChartEditor(
         setHasChanges(true);
     }, []);
 
+    const addHeadcountOpen = useCallback((pid: string | null = null) => {
+        const chart = chartInstance.current;
+        if (!chart) return;
+        const newId = `vacant_${Date.now()}`;
+        const data = {
+            id: newId,
+            pid: pid,
+            stpid: null,
+            name: "Vacant Position",
+            title: "Open Headcount",
+            img: "/headcount_open.png",
+            tags: ["headcount_open"],
+            orig_pid: pid,
+            dept: null,
+            BU: null,
+            description: "Open headcount position",
+        };
+        chart.addNode(data);
+        setHasChanges(true);
+    }, []);
+
     const removeNode = useCallback((nodeId: string) => {
         const chart = chartInstance.current;
         if (!chart) return;
@@ -238,6 +259,11 @@ export function useOrgChartEditor(
                         icon: OrgChart.icon.add(24, 24, "#7A7A7A"),
                         onClick: addEmployee,
                     },
+                    addHeadcountOpen: {
+                        text: "Add Open Headcount",
+                        icon: OrgChart.icon.add(24, 24, "#7A7A7A"),
+                        onClick: addHeadcountOpen,
+                    },
                     // We remove default 'details' and 'edit' from menu as well, or keep them but handled custom?
                     // Let's keep context menu simple for now or map 'edit' to our custom logic if possible.
                     // For now, removing 'details'/'edit' from context menu effectively forces usage of click or our custom flow.
@@ -251,6 +277,7 @@ export function useOrgChartEditor(
                 tags: {
                     group: { template: "group" },
                     Emp_probation: { template: "big_v2" },
+                    headcount_open: { template: "big_hc_open" },
                 },
             });
 
@@ -267,6 +294,13 @@ export function useOrgChartEditor(
                     const nodeId = args.node.id;
                     moveNode(nodeId, direction);
                     return false; // Prevent default node click
+                }
+
+                // Check if clicked ON the menu button (3 dots)
+                const menuBtn = event.target.closest('[data-ctrl-menu]');
+                if (menuBtn) {
+                    // Allow default behavior (opening the menu)
+                    return;
                 }
 
                 const nodeId = args.node.id;
@@ -403,6 +437,7 @@ export function useOrgChartEditor(
         updateNodeData,
         addDepartment, // Expose
         addEmployee,   // Expose
+        addHeadcountOpen, // Expose
         removeNode,    // Expose
         moveNode,      // Expose for swapping
         loadingChart,
