@@ -9,11 +9,6 @@ const nextConfig = {
         source: '/(.*)',
         headers: [
           {
-            // Cho phép nhúng iframe từ mọi nguồn (X-Frame-Options)
-            key: 'X-Frame-Options',
-            value: 'ALLOWALL',
-          },
-          {
             // Content Security Policy cho phép nhúng (frame-ancestors *)
             key: 'Content-Security-Policy',
             value: "frame-ancestors *",
